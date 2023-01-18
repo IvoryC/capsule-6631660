@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+## SCRIPT TO RUN COMPLETE SCRuB ANALYSIS
+
+# set to 1 in order to run the full simulations and prediction pipelines
+RUN_SIMULATIONS=0
+RUN_FULL_PREDICTIONS=0
+
+mkdir ../results/data
+mkdir ../results/data/Fig_1
+mkdir ../results/data/Fig_2
+mkdir ../results/data/Fig_3
+mkdir ../results/data/Fig_3/decontaminated-samples
+mkdir ../results/Plots
+mkdir ../results/Plots/fig_3
+mkdir ../results/Supplementary_figures
+mkdir ../results/Supplementary_figures/F_S10
+mkdir ../results/Supplementary_figures/F_S8
+mkdir ../results/Supplementary_figures/F_S7
+mkdir ../results/Supplementary_figures/F_S3
+mkdir ../results/Supplementary_figures/F_S4
+mkdir ../results/Supplementary_figures/F_S5
+mkdir ../results/Supplementary_figures/F_S6
+mkdir ../results/Supplementary_figures/F_S1
+
+
+Rscript Fig2/run_decontaminations.R "$@" 
+Rscript Fig2/decontaminate_second_plate.R "$@" 
+Rscript Fig2/decontaminate_second_plate.R "$@" 
+Rscript Fig2/Sensitivity_analyses/run_S7_analyses.R "$@" 
+Rscript Fig3/run-decontaminations.R "$@"
+Rscript Fig3/run_banfield_analysis.R "$@"
+Rscript Fig3/run_banfield_analysis.R "$@"
+
+if [ $RUN_SIMULATIONS -eq 1 ]
+then
+	## if specified, run the more computationally expensive analyses
+	Rscript Fig1/Run_Fig1_Simulations.R
+else
+	echo 'Copying results from precomputed simulations...'
+	cp ../data/Precomputed_simulations/Fig_1/* ../results/data/Fig_1/
+fi
+
+if [ $RUN_FULL_PREDICTIONS -eq 1 ]
+then
+	Rscript Tumor/decontaminate_cancers.R "$@"
+	python3 Tumor/run_cancer_preds.py
+	Rscript Plasma/Run_plasma_deconts_and_preds.R
+else
+	echo 'Copying precomputed Tumor results'
+	cp -r ../data/Precomputed_results/Tumor ../results/data/Tumor
+	echo 'Copying precomputed Plasma results'
+	cp -r ../data/Precomputed_results/Fig4_plasma ../results/data/Fig4_plasma
+fi
+
+
+Rscript Tumor/build_tumor_vd.R "$@"
+python3 Plot_generation/__init__.py 
+Rscript Plot_generation/figs2_VD.R "$@" 
+
+
+
