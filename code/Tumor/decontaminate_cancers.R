@@ -12,7 +12,7 @@ source('SCRuB/lsq_initializations.R')
 source('SCRuB/main_functions.R')
 source('SCRuB/spatial_functions.R')
 
-set.seed(1)
+set.seed(29)
 
 load('../data/Fig3/cancer_decont_input.Rdata')
 
@@ -146,7 +146,7 @@ run_decontam_layer <- function(df,
   return(recombined_df)
 }
 
-set.seed(2)
+set.seed(39)
 reverse_paraf_out <- all_info %>%
   run_decontam_layer( SCRUB, 'paraf control', 'Center', parallelize = FALSE)
 

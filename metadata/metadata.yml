@@ -1,5 +1,5 @@
 metadata_version: 1
-name: Contamination source modeling with SCRuB improves cancer phenotype prediction
+name: Copy of Contamination source modeling with SCRuB improves cancer phenotype prediction
   from microbiome data
 description: SCRuB (Source-tracking for Contamination Removal in microBiomes), is
   a probabilistic method for high-precision in silico decontamination. SCRuB incorporates

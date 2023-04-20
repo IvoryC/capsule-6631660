@@ -16,7 +16,7 @@ source('SCRuB/main_functions.R')
 
 
 
-for(seed in 0:9){
+for(seed in 10:19){
   set.seed(seed)
 print(paste('running iteration', seed))
 dec_ind <- read.csv('../data/Fig3_plasma/Metadata-Plasma-For-Decontam-With-Negative-And-Positive-Controls.csv')
