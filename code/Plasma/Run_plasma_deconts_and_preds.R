@@ -1,4 +1,5 @@
 
+INCLUDE_MICRODECON = FALSE
 
 install.packages('splitstackshape', repos='http://cran.us.r-project.org')
 library(splitstackshape)
@@ -7,7 +8,7 @@ library(biomformat)
 library(vegan)
 library(glmnet)
 library(torch)
-library(microDecon)
+if (INCLUDE_MICRODECON) library(microDecon)
 # install_torch()
 
 source('SCRuB/lsq_initializations.R')
@@ -125,69 +126,71 @@ scrub_df <- scrub_df[, (colSums(scrub_df) > 500) %>% which]
 
 
 ## run through microdecon
-
-CLEAN_SAMPLES_MICRODECON <- function(smps, cnts){
-  cname_placeholder <- colnames(smps)
-  colnames(smps) <- paste0('OTU_', 1:ncol(smps))
-  colnames(cnts) <- paste0('OTU_', 1:ncol(smps))
-  print('new run')
-  print(sum(smps))
+if (INCLUDE_MICRODECON) {
   
-  if(sum(smps)==0){return(list(decontaminated_samples=smps, 
-                               estimated_sources=colSums(cnts))) }
-  tmp <- data.frame( rbind( colnames(smps), cnts, smps ) %>% t() )
-  tmp[, 2:( ncol(tmp) ) ]  <- as.numeric( as.matrix( tmp[, 2:( ncol(tmp) ) ] ) )
-  decontaminated <- decon(data = tmp, numb.blanks=nrow(cnts), numb.ind= c(nrow(smps)), taxa=F)
-  # print( as.matrix(decontaminated$decon.table)[1:20, ] )
-  md_out <- smps*0
-  md_out[,decontaminated$decon.table$V1 %>% as.character() %>% unname()] <- decontaminated$decon.table[,3:(2 + nrow(smps) )] %>% t() %>% as.double()
-  print(dim(decontaminated$decon.table))
-  print(sum(md_out))
-  colnames(md_out) <- cname_placeholder
-  return(list(decontaminated_samples=md_out, 
-              estimated_sources=colSums(cnts)))
+  CLEAN_SAMPLES_MICRODECON <- function(smps, cnts){
+    cname_placeholder <- colnames(smps)
+    colnames(smps) <- paste0('OTU_', 1:ncol(smps))
+    colnames(cnts) <- paste0('OTU_', 1:ncol(smps))
+    print('new run')
+    print(sum(smps))
+    
+    if(sum(smps)==0){return(list(decontaminated_samples=smps, 
+                                 estimated_sources=colSums(cnts))) }
+    tmp <- data.frame( rbind( colnames(smps), cnts, smps ) %>% t() )
+    tmp[, 2:( ncol(tmp) ) ]  <- as.numeric( as.matrix( tmp[, 2:( ncol(tmp) ) ] ) )
+    decontaminated <- decon(data = tmp, numb.blanks=nrow(cnts), numb.ind= c(nrow(smps)), taxa=F)
+    # print( as.matrix(decontaminated$decon.table)[1:20, ] )
+    md_out <- smps*0
+    md_out[,decontaminated$decon.table$V1 %>% as.character() %>% unname()] <- decontaminated$decon.table[,3:(2 + nrow(smps) )] %>% t() %>% as.double()
+    print(dim(decontaminated$decon.table))
+    print(sum(md_out))
+    colnames(md_out) <- cname_placeholder
+    return(list(decontaminated_samples=md_out, 
+                estimated_sources=colSums(cnts)))
+  }
+  
+  tmp_fwd <- as.matrix( unique_samps[ unique_metadata %>% 
+                                        filter(sample_type %>% 
+                                                 str_detect('control blank library prep') == F) %>% 
+                                        pull(X.SampleID) %>% 
+                                        as.character(), ] )
+  
+  
+  is_control <-  unique_metadata[row.names(tmp_fwd),]$sample_type=='control blank DNA extraction'
+  plasma_microdec <- CLEAN_SAMPLES_MICRODECON(tmp_fwd[is_control==F, ], tmp_fwd[is_control, ] )
+  
+  row.names( plasma_microdec$decontaminated_samples ) <- unique_metadata[row.names(tmp_fwd),
+  ][ unique_metadata[row.names(tmp_fwd),
+  ]$sample_type!='control blank DNA extraction', ] %>% row.names()
+  
+  
+  
+  next_lvl_mat <- plasma_microdec$decontaminated_samples %>%
+    rbind(unique_samps[row.names(unique_metadata %>%
+                                   filter(sample_type=='control blank library prep')), ])
+  
+  
+  is_control = c( rep(F, nrow(plasma_microdec$decontaminated_samples) ),
+                  rep(T, sum(unique_metadata$sample_type=='control blank library prep')))
+  
+  plasma_microdec_2nd <- CLEAN_SAMPLES_MICRODECON(next_lvl_mat[is_control==F, ], next_lvl_mat[is_control, ] )
+  
+  
+  row.names(plasma_microdec_2nd$decontaminated_samples) <- unique_metadata[row.names(plasma_microdec$decontaminated_samples),
+  ][ unique_metadata[row.names(plasma_microdec$decontaminated_samples ),
+  ]$sample_type!='control blank library prep', ] %>% row.names()
+  
+  
+  colnames(plasma_microdec_2nd$decontaminated_samples) <- colnames(unique_samps)
+  
+  microdec_df <- plasma_microdec_2nd$decontaminated_samples[,  ( ( plasma_microdec_2nd$decontaminated_samples %>% colSums() ) > 0 ) %>% which]
+  microdec_df <- microdec_df[row.names(metadataPSMatchedDPQCFiltered), ]
+  
+  
+  microdec_df <- microdec_df[, (colSums(microdec_df) > 500) %>% which]
+  
 }
-
-tmp_fwd <- as.matrix( unique_samps[ unique_metadata %>% 
-                                      filter(sample_type %>% 
-                                               str_detect('control blank library prep') == F) %>% 
-                                      pull(X.SampleID) %>% 
-                                      as.character(), ] )
-
-
-is_control <-  unique_metadata[row.names(tmp_fwd),]$sample_type=='control blank DNA extraction'
-plasma_microdec <- CLEAN_SAMPLES_MICRODECON(tmp_fwd[is_control==F, ], tmp_fwd[is_control, ] )
-
-row.names( plasma_microdec$decontaminated_samples ) <- unique_metadata[row.names(tmp_fwd),
-][ unique_metadata[row.names(tmp_fwd),
-]$sample_type!='control blank DNA extraction', ] %>% row.names()
-
-
-
-next_lvl_mat <- plasma_microdec$decontaminated_samples %>%
-  rbind(unique_samps[row.names(unique_metadata %>%
-                                 filter(sample_type=='control blank library prep')), ])
-
-
-is_control = c( rep(F, nrow(plasma_microdec$decontaminated_samples) ),
-                rep(T, sum(unique_metadata$sample_type=='control blank library prep')))
-
-plasma_microdec_2nd <- CLEAN_SAMPLES_MICRODECON(next_lvl_mat[is_control==F, ], next_lvl_mat[is_control, ] )
-
-
-row.names(plasma_microdec_2nd$decontaminated_samples) <- unique_metadata[row.names(plasma_microdec$decontaminated_samples),
-][ unique_metadata[row.names(plasma_microdec$decontaminated_samples ),
-]$sample_type!='control blank library prep', ] %>% row.names()
-
-
-colnames(plasma_microdec_2nd$decontaminated_samples) <- colnames(unique_samps)
-
-microdec_df <- plasma_microdec_2nd$decontaminated_samples[,  ( ( plasma_microdec_2nd$decontaminated_samples %>% colSums() ) > 0 ) %>% which]
-microdec_df <- microdec_df[row.names(metadataPSMatchedDPQCFiltered), ]
-
-
-microdec_df <- microdec_df[, (colSums(microdec_df) > 500) %>% which]
-
 
 # Decontam, Restrictive
 library(decontam)
@@ -309,7 +312,9 @@ vsnm <- function(qcData){
 
 scrubbed_normalized <- vsnm(scrub_df[row.names(metadataPSMatchedDPQCFiltered), ])
 
-microdecon_normalized <- vsnm(microdec_df[row.names(metadataPSMatchedDPQCFiltered), ])
+if (INCLUDE_MICRODECON){
+  microdecon_normalized <- vsnm(microdec_df[row.names(metadataPSMatchedDPQCFiltered), ])
+}
 
 # scrubbed_normalized <- vsnm(scrub_df[paste0( 'X' , row.names(metadataPSMatchedDPQCFiltered) ), ] )
 # 
@@ -758,9 +763,10 @@ diver_dec <- rbind(decontammed_data) %>% cbind( matrix(0,nrow=nrow(decontammed_d
 diver_lb_dec <- rbind(decontammed_data_low_bm) %>% cbind( matrix(0,nrow=nrow(decontammed_data_low_bm), ncol = ncol(raw_inp)-ncol(decontammed_data_low_bm) ) ) %>%
   diversity(index=div_ind)
 
-
-diver_microdec <- rbind(microdec_df) %>% cbind( matrix(0,nrow=nrow(microdec_df), ncol = ncol(raw_inp)-ncol(microdec_df) ) ) %>%
-  diversity(index=div_ind)
+if (INCLUDE_MICRODECON){
+  diver_microdec <- rbind(microdec_df) %>% cbind( matrix(0,nrow=nrow(microdec_df), ncol = ncol(raw_inp)-ncol(microdec_df) ) ) %>%
+    diversity(index=div_ind)
+}
 
 # decontammed_data %>%
 # diversity(index=div_ind)
@@ -770,14 +776,17 @@ n_melanoma_samples <- length(diver_raw)
 divers_df <- data.frame( 
   c( diver_raw, 
      diver_scrub, 
-     diver_dec, diver_lb_dec, diver_rest, diver_microdec
+     diver_dec, diver_lb_dec, 
+     ifelse(INCLUDE_MICRODECON,c(diver_rest, diver_microdec), diver_rest)
   ), 
   c( rep('Raw', n_plasma_samples),
      rep('SCRuB', n_plasma_samples),
      rep('Decontam', n_plasma_samples),
      rep('Decontam (LB)', n_plasma_samples),
      rep('Restrictive', n_plasma_samples),
-     rep('microDecon', n_plasma_samples) 
+     ifelse(INCLUDE_MICRODECON,
+            c(rep('Restrictive', n_plasma_samples), rep('microDecon', n_plasma_samples) ), 
+            rep('Restrictive', n_plasma_samples))
   )
 )
 
@@ -807,7 +816,7 @@ dir.create(paste0('../results/data/Fig4_plasma/trial_', seed, '/dec_preds') )
 dir.create(paste0('../results/data/Fig4_plasma/trial_', seed, '/dec_standard') )
 dir.create(paste0('../results/data/Fig4_plasma/trial_', seed, '/dec_lb') )
 dir.create(paste0('../results/data/Fig4_plasma/trial_', seed, '/restrictive_preds') )
-dir.create(paste0('../results/data/Fig4_plasma/trial_', seed, '/microdecon_preds') )
+if (INCLUDE_MICRODECON) dir.create(paste0('../results/data/Fig4_plasma/trial_', seed, '/microdecon_preds') )
 
 ## loop through the 6 idifferent prediction tasks
 for(idx in 1:ncol(xy)){
@@ -870,14 +879,15 @@ for(idx in 1:ncol(xy)){
 
 
 ## loop through the 6 idifferent prediction tasks
-for(idx in 1:ncol(xy)){
-  scrubbed_hVsC_tmp <- loocvDTs(snmData = microdecon_normalized,
-                                samplingSize = sampling_sizes[idx], 
-                                DTs = xy[ ,idx],
-                                filenameString = paste0('../results/data/Fig4_plasma/trial_', seed, '/microdecon_preds/', xy[,idx][1], '_', xy[,idx][2] ),
-                                caretTuneGrid = defaultGBMGrid)
+if (INCLUDE_MICRODECON) {
+  for(idx in 1:ncol(xy)){
+    scrubbed_hVsC_tmp <- loocvDTs(snmData = microdecon_normalized,
+                                  samplingSize = sampling_sizes[idx], 
+                                  DTs = xy[ ,idx],
+                                  filenameString = paste0('../results/data/Fig4_plasma/trial_', seed, '/microdecon_preds/', xy[,idx][1], '_', xy[,idx][2] ),
+                                  caretTuneGrid = defaultGBMGrid)
+  }
 }
-
 
 
 }
