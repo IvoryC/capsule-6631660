@@ -3,7 +3,7 @@
 
 # set to 1 in order to run the full simulations and prediction pipelines
 RUN_SIMULATIONS=0
-RUN_FULL_PREDICTIONS=0
+RUN_FULL_PREDICTIONS=1
 
 mkdir ../results/data
 mkdir ../results/data/Fig_1
@@ -23,13 +23,13 @@ mkdir ../results/Supplementary_figures/F_S6
 mkdir ../results/Supplementary_figures/F_S1
 
 
-Rscript Fig2/run_decontaminations.R "$@" 
-Rscript Fig2/decontaminate_second_plate.R "$@" 
-Rscript Fig2/decontaminate_second_plate.R "$@" 
-Rscript Fig2/Sensitivity_analyses/run_S7_analyses.R "$@" 
-Rscript Fig3/run-decontaminations.R "$@"
-Rscript Fig3/run_banfield_analysis.R "$@"
-Rscript Fig3/run_banfield_analysis.R "$@"
+# Rscript Fig2/run_decontaminations.R "$@" 
+# Rscript Fig2/decontaminate_second_plate.R "$@" 
+# Rscript Fig2/decontaminate_second_plate.R "$@" 
+# Rscript Fig2/Sensitivity_analyses/run_S7_analyses.R "$@" 
+# Rscript Fig3/run-decontaminations.R "$@"
+# Rscript Fig3/run_banfield_analysis.R "$@"
+# Rscript Fig3/run_banfield_analysis.R "$@"
 
 if [ $RUN_SIMULATIONS -eq 1 ]
 then
@@ -55,7 +55,7 @@ fi
 
 Rscript Tumor/build_tumor_vd.R "$@"
 python3 Plot_generation/__init__.py 
-Rscript Plot_generation/figs2_VD.R "$@" 
+# Rscript Plot_generation/figs2_VD.R "$@" 
 
 
 
