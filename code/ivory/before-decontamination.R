@@ -6,7 +6,7 @@
 
 # library(splitstackshape)
 library(tidyverse)
-# library(biomformat) 
+library(biomformat) 
 # library(vegan)
 # library(glmnet)
 # library(torch)
