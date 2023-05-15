@@ -46,11 +46,11 @@ fi
 echo "Date/Time: $(date)"
 if [ $RUN_FULL_PREDICTIONS -eq 1 ]
 then
-	echo "Running decontaminate_cancers.R..."
-	Rscript Tumor/decontaminate_cancers.R "$@"
-	echo "Date/Time: $(date)"
-	echo "Running run_cancer_preds.py..."
-	python3 Tumor/run_cancer_preds.py
+	# echo "Running decontaminate_cancers.R..."
+	# Rscript Tumor/decontaminate_cancers.R "$@"
+	# echo "Date/Time: $(date)"
+	# echo "Running run_cancer_preds.py..."
+	# python3 Tumor/run_cancer_preds.py
 	echo "Date/Time: $(date)"
 	echo "Running Run_plasma_deconts_and_preds.R..."
 	Rscript Plasma/Run_plasma_deconts_and_preds.R
