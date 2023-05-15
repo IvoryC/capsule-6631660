@@ -1,5 +1,5 @@
 
-INCLUDE_MICRODECON = FALSE
+INCLUDE_MICRODECON = TRUE
 
 install.packages('splitstackshape', repos='http://cran.us.r-project.org')
 library(splitstackshape)
