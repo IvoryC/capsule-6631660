@@ -19,12 +19,12 @@ source('SCRuB/main_functions.R')
 for(seed in 0:9){
   set.seed(seed)
 print(paste('running iteration', seed))
-dec_ind <- read.csv('../data/Fig3_plasma/Metadata-Plasma-For-Decontam-With-Negative-And-Positive-Controls.csv')
+dec_ind <- read.csv('../data/Fig4_plasma/Metadata-Plasma-For-Decontam-With-Negative-And-Positive-Controls.csv')
 
-metadataPSMatchedDPQCFiltered <- read.csv('../data/Fig3_plasma/Metadata-Plasma-Filtered-For-Analysis.csv', row.names=1)
-snmDataKrakenCFDecontamDPQC <-read.csv('../data/Fig3_plasma/Kraken-Plasma-Voom-SNM-Age-And-Sex-Data.csv', row.names=1)
+metadataPSMatchedDPQCFiltered <- read.csv('../data/Fig4_plasma/Metadata-Plasma-Filtered-For-Analysis.csv', row.names=1)
+snmDataKrakenCFDecontamDPQC <-read.csv('../data/Fig4_plasma/Kraken-Plasma-Voom-SNM-Age-And-Sex-Data.csv', row.names=1)
 
-data <- read_biom(biom_file = '../data/Fig3_plasma/136205_47212_analysis_Metagenomic_Woltkav011Databaseoptgenomeqiitadbsqpwoltkarep200Rep200BIOMnonebiom.biom')
+data <- read_biom(biom_file = '../data/Fig4_plasma/136205_47212_analysis_Metagenomic_Woltkav011Databaseoptgenomeqiitadbsqpwoltkarep200Rep200BIOMnonebiom.biom')
 
 taxa_names <- c()
 
@@ -40,7 +40,7 @@ row.names(full_df) <- taxa_names
 full_df <- full_df %>% t()
 
 
-metadata <- read.csv('../data/Fig3_plasma/47212_47212_analysis_mapping.txt', sep='\t')
+metadata <- read.csv('../data/Fig4_plasma/47212_47212_analysis_mapping.txt', sep='\t')
 
 remov_left <- function(x, n){
   substr(x, n, nchar(x))
