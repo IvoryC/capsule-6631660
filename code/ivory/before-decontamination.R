@@ -14,10 +14,12 @@ library(biomformat)
 sessionInfo()
 
 #### a place to save data ####
-dir.create("../results")
-dir.create("../results/data")
-dir.create("../results/data/ivory")
-dir.create("../results/data/ivory/before-decontamination")
+suppressWarnings({
+    dir.create("../results")
+    dir.create("../results/data")
+    dir.create("../results/data/ivory")
+    dir.create("../results/data/ivory/before-decontamination") 
+})
 
 #### as is files ####
 
@@ -100,7 +102,7 @@ well_dists <- unique_metadata %>%
     select(well_loc, indices_loc) %>%
     dist(method = 'euclidean') %>% as.matrix()
 
-well_dists = round(well_dists, digits = 3)
+well_dists = round(well_dists, digits = 2)
 
 write.csv(well_dists,
           "../results/data/ivory/before-decontamination/well_dists.csv")
