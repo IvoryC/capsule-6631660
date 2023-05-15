@@ -1,4 +1,5 @@
 
+INCLUDE_MICRODECON = FALSE
 
 library(tidyverse)
 # library(phyloseq)
@@ -6,7 +7,7 @@ library(decontam)
 library(vegan)
 library(ggvenn)
 library(glmnet)
-library(microDecon)
+if (INCLUDE_MICRODECON) library(microDecon)
 
 source('SCRuB/lsq_initializations.R')
 source('SCRuB/main_functions.R')
@@ -239,41 +240,44 @@ global_fully_restrictive <- cbind(all_info[neg_idx==F, 1:5],
   
 global_fully_restrictive %>% write.csv('../results/data/Tumor/global_fully_restrictive_result.csv')
 
-CLEAN_SAMPLES_MICRODECON <- function(smps, cnts){
-  cname_placeholder <- colnames(smps)
-  colnames(smps) <- paste0('OTU_', 1:ncol(smps))
-  colnames(cnts) <- paste0('OTU_', 1:ncol(smps))
-  print('new run')
-  print(sum(smps))
+if (INCLUDE_MICRODECON) {
+  CLEAN_SAMPLES_MICRODECON <- function(smps, cnts){
+    cname_placeholder <- colnames(smps)
+    colnames(smps) <- paste0('OTU_', 1:ncol(smps))
+    colnames(cnts) <- paste0('OTU_', 1:ncol(smps))
+    print('new run')
+    print(sum(smps))
+    
+    if(sum(smps)==0){return(list(decontaminated_samples=smps, 
+                                 estimated_sources=colSums(cnts))) }
+    tmp <- data.frame( rbind( colnames(smps), cnts, smps ) %>% t() )
+    tmp[, 2:( ncol(tmp) ) ]  <- as.numeric( as.matrix( tmp[, 2:( ncol(tmp) ) ] ) )
+    decontaminated <- decon(data = tmp, numb.blanks=nrow(cnts), numb.ind= c(nrow(smps)), taxa=F)
+    # print( as.matrix(decontaminated$decon.table)[1:20, ] )
+    md_out <- smps*0
+    md_out[,decontaminated$decon.table$X1 %>% as.character() %>% unname()] <- decontaminated$decon.table[,3:(2 + nrow(smps) )] %>% t() %>% as.double()
+    print(dim(decontaminated$decon.table))
+    print(sum(md_out))
+    colnames(md_out) <- cname_placeholder
+    return(list(decontaminated_samples=md_out, 
+                estimated_sources=colSums(cnts)))
+  }
   
-  if(sum(smps)==0){return(list(decontaminated_samples=smps, 
-                               estimated_sources=colSums(cnts))) }
-  tmp <- data.frame( rbind( colnames(smps), cnts, smps ) %>% t() )
-  tmp[, 2:( ncol(tmp) ) ]  <- as.numeric( as.matrix( tmp[, 2:( ncol(tmp) ) ] ) )
-  decontaminated <- decon(data = tmp, numb.blanks=nrow(cnts), numb.ind= c(nrow(smps)), taxa=F)
-  # print( as.matrix(decontaminated$decon.table)[1:20, ] )
-  md_out <- smps*0
-  md_out[,decontaminated$decon.table$X1 %>% as.character() %>% unname()] <- decontaminated$decon.table[,3:(2 + nrow(smps) )] %>% t() %>% as.double()
-  print(dim(decontaminated$decon.table))
-  print(sum(md_out))
-  colnames(md_out) <- cname_placeholder
-  return(list(decontaminated_samples=md_out, 
-              estimated_sources=colSums(cnts)))
+  set.seed(3)
+  microdecon_paraf_out <- all_info %>%
+    run_decontam_layer( CLEAN_SAMPLES_MICRODECON,  'paraf control', 'Center', parallelize = FALSE)
+  
+  microdecon_ntc_out <- microdecon_paraf_out %>%
+    run_decontam_layer( CLEAN_SAMPLES_MICRODECON,  'NTC', "PCR...New.Batch", parallelize = FALSE)
+  
+  microdecon_control_out <- microdecon_ntc_out %>%
+    run_decontam_layer( CLEAN_SAMPLES_MICRODECON,  'control', "DNA.Extraction.Batch", parallelize = FALSE)
+  
+  
+  microdecon_control_out %>% write.csv(file = '../results/data/Tumor/microdecon_result.csv')
+}else{
+  message("Sipping microdecon.")
 }
-
-set.seed(3)
-microdecon_paraf_out <- all_info %>%
-  run_decontam_layer( CLEAN_SAMPLES_MICRODECON,  'paraf control', 'Center', parallelize = FALSE)
-
-microdecon_ntc_out <- microdecon_paraf_out %>%
-  run_decontam_layer( CLEAN_SAMPLES_MICRODECON,  'NTC', "PCR...New.Batch", parallelize = FALSE)
-
-microdecon_control_out <- microdecon_ntc_out %>%
-  run_decontam_layer( CLEAN_SAMPLES_MICRODECON,  'control', "DNA.Extraction.Batch", parallelize = FALSE)
-
-
-microdecon_control_out %>% write.csv(file = '../results/data/Tumor/microdecon_result.csv')
-
 
 set.seed(100)
 #use this cell to run decontam
@@ -331,20 +335,25 @@ diver_dec_lb <- ( ( decontam_cont_out_lb %>%
   diversity(index=div_ind)
 
 
-diver_microdec <- ( ( microdecon_control_out %>%
-        filter(tissue.type=='Melanoma') )[, 6:ncol(microdecon_control_out)] ) %>%
-         diversity(index=div_ind)
+if (INCLUDE_MICRODECON) {
+  diver_microdec <- ( ( microdecon_control_out %>%
+                          filter(tissue.type=='Melanoma') )[, 6:ncol(microdecon_control_out)] ) %>%
+    diversity(index=div_ind)
+}
 
 
 n_melanoma_samples <- length(diver_raw)
 divers_df <- data.frame( 
   c( diver_raw, diver_scrub, diver_dec,  diver_rest, diver_dec_lb, 
-      full_restrictive_div, diver_microdec ), 
+     ifelse(INCLUDE_MICRODECON, 
+            c(full_restrictive_div, diver_microdec), 
+            full_restrictive_div) ),
   c( rep('Raw', n_melanoma_samples), rep('SCRUB', n_melanoma_samples), 
      rep('Decontam', n_melanoma_samples), rep( 'Restrictive (Original)', n_melanoma_samples ),
      rep('Decontam (LB)', n_melanoma_samples), 
-     rep('Restrictive', n_melanoma_samples), 
-     rep('microDecon', n_melanoma_samples) )
+     ifelse(INCLUDE_MICRODECON, 
+            c(rep('Restrictive', n_melanoma_samples), rep('microDecon', n_melanoma_samples)), 
+            rep('Restrictive', n_melanoma_samples)) )
      )
 
 colnames(divers_df) <- c('Shannon', 'Dataset')

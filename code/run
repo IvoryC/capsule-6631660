@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 ## SCRIPT TO RUN COMPLETE SCRuB ANALYSIS
 
+echo "Start Date/Time: $(date)"
+
 # set to 1 in order to run the full simulations and prediction pipelines
 RUN_SIMULATIONS=0
 RUN_FULL_PREDICTIONS=1
@@ -31,6 +33,7 @@ mkdir ../results/Supplementary_figures/F_S1
 # Rscript Fig3/run_banfield_analysis.R "$@"
 # Rscript Fig3/run_banfield_analysis.R "$@"
 
+echo "Date/Time: $(date)"
 if [ $RUN_SIMULATIONS -eq 1 ]
 then
 	## if specified, run the more computationally expensive analyses
@@ -40,12 +43,15 @@ else
 	cp ../data/Precomputed_simulations/Fig_1/* ../results/data/Fig_1/
 fi
 
+echo "Date/Time: $(date)"
 if [ $RUN_FULL_PREDICTIONS -eq 1 ]
 then
 	echo "Running decontaminate_cancers.R..."
 	Rscript Tumor/decontaminate_cancers.R "$@"
+	echo "Date/Time: $(date)"
 	echo "Running run_cancer_preds.py..."
 	python3 Tumor/run_cancer_preds.py
+	echo "Date/Time: $(date)"
 	echo "Running Run_plasma_deconts_and_preds.R..."
 	Rscript Plasma/Run_plasma_deconts_and_preds.R
 else
@@ -55,14 +61,17 @@ else
 	cp -r ../data/Precomputed_results/Fig4_plasma ../results/data/Fig4_plasma
 fi
 
+echo "Date/Time: $(date)"
 echo "Running build_tumor_vd.R..."
 Rscript Tumor/build_tumor_vd.R "$@"
 
+echo "Date/Time: $(date)"
 echo "Running Plot_generation/__init__.py..."
 python3 Plot_generation/__init__.py 
 
+echo "Date/Time: $(date)"
 # echo "Running figs2_VD.R..."
 # Rscript Plot_generation/figs2_VD.R "$@" 
 
 
-
+echo "End Date/Time: $(date)"

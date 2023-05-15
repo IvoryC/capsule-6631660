@@ -7,6 +7,8 @@ import warnings
 import os
 warnings.filterwarnings('ignore')
 
+## lines for microdecon are simply commented out.
+## INCLUDE_MICRODECON = FALSE
 
 
 def pull_cancer_datasets():
@@ -29,8 +31,8 @@ def pull_cancer_datasets():
     decontam_lb = pd.read_csv('../results/data/Tumor/decontam_low_biomass_result.csv', index_col = 0)
     decontam_lb = metadata.merge(decontam_lb, on = 'new_SEQ_NAMES')
     
-    microdecon = pd.read_csv('../results/data/Tumor/microdecon_result.csv', index_col = 0)
-    microdecon = metadata.merge(microdecon, on = 'new_SEQ_NAMES')
+    # microdecon = pd.read_csv('../results/data/Tumor/microdecon_result.csv', index_col = 0)
+    # microdecon = metadata.merge(microdecon, on = 'new_SEQ_NAMES')
     
 
     df_freqs = pd.read_csv('../data/Fig3/df_freqs.csv', index_col = 0).fillna(0)
@@ -62,7 +64,7 @@ def pull_cancer_datasets():
                    'restrictive':restrictive,
                    'decontam':decontam, 
                    'decontam_lb':decontam_lb,
-                   'microDecon':microdecon,
+                   # 'microDecon':microdecon,
                    'raw':contaminated
                    }
     
