@@ -57,8 +57,10 @@ fi
 
 echo "Running build_tumor_vd.R..."
 Rscript Tumor/build_tumor_vd.R "$@"
+
 echo "Running Plot_generation/__init__.py..."
 python3 Plot_generation/__init__.py 
+
 # echo "Running figs2_VD.R..."
 # Rscript Plot_generation/figs2_VD.R "$@" 
 
