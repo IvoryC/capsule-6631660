@@ -13,7 +13,23 @@ mkdir ../results/Supplementary_figures/F_S10
 
 
 echo "Date/Time: $(date)"
-echo "Running Run_plasma_deconts_and_preds.R..."
-Rscript Plasma/Run_plasma_deconts_and_preds.R
+
+# echo "Running Run_plasma_deconts_and_preds.R..."
+# Rscript Plasma/Run_plasma_deconts_and_preds.R
+
+
+
+# drafting my own version with more broken out pieces...
+
+echo "before-decontamination.R ..."
+Rscript ivory/before-decontamination.R 
+
+
+
+
+
+
+
+
 
 echo "End Date/Time: $(date)"
