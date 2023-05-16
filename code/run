@@ -29,7 +29,9 @@ echo -e "\n=========================================================\n"
 echo -e "decontaminate_SCRuB.R ... \n"
 Rscript ivory/decontaminate_SCRuB.R 3
 
-
+echo -e "\n=========================================================\n"
+echo -e "post-decont-vsnm.R ... \n"
+Rscript ivory/post-decont-vsnm.R
 
 
 
