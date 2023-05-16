@@ -10,6 +10,8 @@ library(glmnet)
 library(torch)
 # install_torch()
 
+sessionInfo()
+
 seed=3
 ## Do several independent iterations. For now, just do it all once.
 # for(seed in 0:2){
@@ -35,6 +37,7 @@ dim(unique_samps)
 unique_metadata <- read.csv("../results/data/ivory/before-decontamination/unique_metadata.csv", row.names = 1)
 message("unique_metadata.csv has dimentions:")
 dim(unique_metadata)
+unique_metadata$sample_plate = as.character(unique_metadata$sample_plate)
 
 # Actually.... we just get this from the meta data.
 # well_dists <- read.csv("../results/data/ivory/before-decontamination/well_dists.csv", row.names = 1, check.names = F)
@@ -46,7 +49,7 @@ dim(unique_metadata)
 useRPackage = T
 if (useRPackage){
     library(SCRuB)
-    message(packageVersion("SCRuB"))
+    message("SCRuB package version: ", packageVersion("SCRuB"))
     
     control_types = c('control blank library prep', 'control blank DNA extraction')
     unique_metadata$is_control = unique_metadata$sample_type %in% control_types
