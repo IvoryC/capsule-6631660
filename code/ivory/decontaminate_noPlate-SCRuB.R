@@ -18,7 +18,7 @@ suppressWarnings({
     dir.create("../results/data")
     dir.create("../results/data/ivory")
     dir.create("../results/data/ivory/decontamination")
-    dir.create("../results/data/ivory/decontamination/SCRuB")
+    dir.create("../results/data/ivory/decontamination/SCRuB_noPlate")
 })
 
 #### read data ####
@@ -41,12 +41,12 @@ metadata$sample_well = as.character(metadata$sample_well)
 sample_intersect = intersect(row.names(metadata), 
                              row.names(full_df))
 
-full_df = full_df[sample_intersect, ]
-metadata = metadata[sample_intersect, ]
+counts = full_df[sample_intersect, ]
+meta = metadata[sample_intersect, ]
 
 #### run through SCRuB ####
 
-numTrials = 10
+numTrials = 2
 args = commandArgs(trailingOnly=TRUE)
 if (length(args) > 0) numTrials = args[1]
 
@@ -56,47 +56,22 @@ for (trialNumber in 1:numTrials){
     seed = trialNumber * 29
     message(paste('Using seed:', seed))
     set.seed(seed)
-
+    
     # I thought I would need to run SCRuB for each contamination source, 
     # but it looks like SCRuB internalizes that iteration process.
     control_types = c('control blank library prep', 'control blank DNA extraction')
-    metadata$is_control = metadata$sample_type %in% control_types
+    meta$is_control = meta$sample_type %in% control_types
     
-    # Note: This decontaminates per plate. And one plate, is not decontaminated all. But the well location info is optional.  
-    #       Could I instead decontaminate the whole data set as one if I just ignore the well location info?
+    # Note: This ignores plate and plat location to instead handle all samples in one go.
     
-    plate_meta_split = split(metadata, f=metadata$sample_plate)
-    message("SCRuB the ", length(plate_meta_split), " plates separately.")
+    # when I passed a table with no controls, got error: "Error in rowSums(.) : 'x' must be numeric"
+    numControls = sum(meta$is_control)
+    message("Data has controls: ", numControls)
     
-    scrub_out_list = list()
+    scrub_output = SCRuB::SCRuB(counts, metadata = meta[,c("is_control", "sample_type")])
     
-    for (plate in names(plate_meta_split)){
-        message("SCRuB-ing plate ", plate)
-        plate_meta = plate_meta_split[[plate]]
-        plate_data = full_df[row.names(plate_meta),]
-        
-        # limit metadata to the EXACT three columns permitted.
-        plate_meta = plate_meta[,c("is_control", "sample_type", "sample_well")]
-        
-        
-        # when I passed a table with no controls, got error: "Error in rowSums(.) : 'x' must be numeric"
-        # so skip any plate with 0 controls
-        numControls = sum(plate_meta$is_control)
-        message("Plate has controls: ", numControls)
-        message(paste(row.names(plate_meta)[plate_meta$is_control], collapse=", "))
-        
-        if (numControls > 0 ){
-            scrub_output = SCRuB::SCRuB(plate_data, metadata = plate_meta)
-            
-            # decontaminated data
-            scrub_out_list[[plate]] <- scrub_output$decontaminated_samples
-            
-        }else{
-            message("Skipping plate")
-            scrub_out_list[[plate]] <- plate_data
-        }
-    }
-    scrub_df = do.call("rbind", scrub_out_list)
+    # decontaminated data
+    scrub_df <- scrub_output$decontaminated_samples
     
     message("scrub_df has dimensions:")
     dim(scrub_df)
@@ -107,7 +82,7 @@ for (trialNumber in 1:numTrials){
     message("scrub_df has dimensions:")
     dim(scrub_df)
     
-    resDir = paste0("../results/data/ivory/decontamination/SCRuB/trial_", trialNumber)
+    resDir = paste0("../results/data/ivory/decontamination/SCRuB_noPlate/trial_", trialNumber)
     suppressWarnings({dir.create(resDir)})
     file = file.path(resDir, "scrub_decontaminated.csv")
     message("Saving scrubbed data as: ", file)

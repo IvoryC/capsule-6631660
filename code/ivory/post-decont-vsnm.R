@@ -38,16 +38,43 @@ metadataPSMatchedDPQCFiltered <- read.csv('../data/Fig4_plasma/Metadata-Plasma-F
 
 sampleSet = row.names(metadataPSMatchedDPQCFiltered)
 
+message("Only include these ", length(sampleSet), " samples:")
+message(paste(sampleSet, collapse = ", "))
+
 
 #### find data files ####
 
 # SCRuB files in ../results/data/decontaminate/SCRuB/trial_*/scrub_output.csv
-infiles = dir("../results/data/ivory/decontamination/SCRuB", pattern="csv", full.names = T, recursive = T)
+# infiles = c(
+#     dir("../results/data/ivory/decontamination/SCRuB", pattern="decontaminated.csv", full.names = T, recursive = T),
+#     dir("../results/data/ivory/decontamination/SCRuB_noPlate", pattern="output.csv", full.names = T, recursive = T))
 
-#### define vsnm function ####
+decontaminationFolder = "../results/data/ivory/decontamination"
+infiles = dir(decontaminationFolder, pattern="decontaminated.csv", full.names = T, recursive = T)
 
-vsnm <- function(qcData){
+#### methods ####
 
+div_ind <- 'shannon'
+message("Using diversity index: ", div_ind)
+
+calcDiversity <- function(table, infile){
+    message("Calculating diversity...")
+    diver = diversity(table, index=div_ind)
+    
+    outfile = sub("decontaminated.csv", "decontaminated_shannon.csv", infile)
+    message("Saving file: ", outfile)
+    write.csv(diver, outfile)
+    return(diver)
+}
+
+vsnm <- function(qcData, infile){
+    imgfile = sub("decontaminated.csv", "decontaminated_voomMeanVarTrend.pdf", infile)
+    message("Any images will be saved to: ", imgfile)
+    pdf(imgfile)
+
+    message("Running vsnm...")
+    # above this line is stuff Ivory added.
+    
     numCores <- parallel::detectCores()
     registerDoMC(cores=numCores)
     
@@ -97,20 +124,67 @@ vsnm <- function(qcData){
                           diagnose = TRUE)
     snmData <<- t(snmDataObjOnly$norm.dat)
     
+    ## above: vsnm function exactly as taken from Run_plasma_deconts_and_preds.R
+    ## below: my addition.
+    dev.off()
+    outfile = sub("decontaminated.csv", "decontaminated_vsnm.csv", infile)
+    message("Saving file: ", outfile)
+    write.csv(snmData, outfile)
 }
 
-#### use it ####
+#### do for each file ####
 
+shortNames = sub(decontaminationFolder, "", infiles)
+shortNames = sub("trial_", "t", shortNames)
+diversitySummary = data.frame(row.names=sampleSet)
 
 for (infile in infiles){
     message("Processing file: ", infile)
-    outfile = sub(".csv", "_vsnm.csv", infile)
     indata = read.csv(infile, row.names = 1)
-    normed <- vsnm(indata[sampleSet, ])
-    message("Saving file: ", outfile)
-    write.csv(normed, outfile)
+    diver = calcDiversity(indata[sampleSet, ], infile)
+    diversitySummary[,infile] = diver[sampleSet]
+    normed <- vsnm(indata[sampleSet, ], infile)
 }
 
+
+#### diversity summary ####
+
+suppressWarnings({
+    dir.create("../results")
+    dir.create("../results/data")
+    dir.create("../results/data/ivory")
+    dir.create("../results/data/ivory/shannon_diversity") 
+})
+
+shortNames = sub(decontaminationFolder, "", names(diversitySummary))
+shortNames = sub("trial_", "t", shortNames)
+names(diversitySummary) = shortNames
+
+summaryFile = "../results/data/ivory/shannon_diversity/shannon_summary.csv"
+message("Saving diversity summary info to: ", summaryFile)
+write.csv(diversitySummary, summaryFile)
+
+heatFile = "../results/data/ivory/shannon_diversity/shannon_heatmap.png"
+message("Saving diversity heatmap: ", heatFile)
+png(heatFile)
+heatmap(as.matrix(diversitySummary))
+dev.off()
+
+
+boxFile = "../results/data/ivory/shannon_diversity/shannon_heatmap.png"
+message("Saving diversity boxplot: ", boxFile)
+png(boxFile)
+boxplot(diversitySummary, las=2, col="skyblue")
+title("Shannon Diversity")
+text(names(diversitySummary), x=c(1:4)-.2, y=2, srt=90)
+dev.off()
+
+
+
+# example
+# Processing file: ../results/data/ivory/decontamination/SCRuB_noPlate/trial_2/scrub_decontaminated.csv
+# Saving file: ../results/data/ivory/decontamination/SCRuB_noPlate/trial_2/scrub_decontaminated_diversity.csv
+# Saving file: ../results/data/ivory/decontamination/SCRuB_noPlate/trial_2/scrub_decontaminated_vsnm.csv
 
 
 # scrubbed_normalized <- vsnm(scrub_df[row.names(metadataPSMatchedDPQCFiltered), ])
