@@ -33,11 +33,13 @@ unique_samps <- read.csv("../results/data/ivory/before-decontamination/unique_sa
 message("unique_samps.csv has dimentions:")
 dim(unique_samps)
 
-# metadata must include columns: "sample_type", "sample_well"
+# metadata must include columns: "sample_type", "sample_well", "sample_plate"
 unique_metadata <- read.csv("../results/data/ivory/before-decontamination/unique_metadata.csv", row.names = 1)
 message("unique_metadata.csv has dimentions:")
 dim(unique_metadata)
 unique_metadata$sample_plate = as.character(unique_metadata$sample_plate)
+unique_metadata$sample_type = as.character(unique_metadata$sample_type)
+unique_metadata$sample_well = as.character(unique_metadata$sample_well)
 
 # Actually.... we just get this from the meta data.
 # well_dists <- read.csv("../results/data/ivory/before-decontamination/well_dists.csv", row.names = 1, check.names = F)
