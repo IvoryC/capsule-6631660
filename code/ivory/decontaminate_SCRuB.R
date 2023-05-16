@@ -32,6 +32,12 @@ row.names(metadata) = metadata$X.SampleID
 message("metadata has dimentions:")
 dim(metadata)
 
+# These lines were not needed when using R version 4.2.2 (2022-10-31), 
+# but without them I hit errors when using R version 3.6.3 (2020-02-29)
+metadata$sample_plate = as.character(metadata$sample_plate)
+metadata$sample_type = as.character(metadata$sample_type)
+metadata$sample_well = as.character(metadata$sample_well)
+
 sample_intersect = intersect(row.names(metadata), 
                              row.names(full_df))
 
