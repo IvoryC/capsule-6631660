@@ -96,16 +96,16 @@ write.csv(unique_metadata,
 
 #### well_dists ####
 
-well_dists <- unique_metadata %>%
-    mutate(well_loc= sample_well %>% substr(1,1) %>% sapply( function(x) which(LETTERS==x)[1]), 
-           indices_loc = sample_well%>% substr(2,3) %>% as.integer ) %>%
-    select(well_loc, indices_loc) %>%
-    dist(method = 'euclidean') %>% as.matrix()
-
-well_dists = round(well_dists, digits = 2)
-
-write.csv(well_dists,
-          "../results/data/ivory/before-decontamination/well_dists.csv")
+# well_dists <- unique_metadata %>%
+#     mutate(well_loc= sample_well %>% substr(1,1) %>% sapply( function(x) which(LETTERS==x)[1]), 
+#            indices_loc = sample_well%>% substr(2,3) %>% as.integer ) %>%
+#     select(well_loc, indices_loc) %>%
+#     dist(method = 'euclidean') %>% as.matrix()
+# 
+# well_dists = round(well_dists, digits = 2)
+# 
+# write.csv(well_dists,
+#           "../results/data/ivory/before-decontamination/well_dists.csv")
 
 message("Done!")
 date()
