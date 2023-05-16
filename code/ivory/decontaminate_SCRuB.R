@@ -2,9 +2,9 @@
 # This draft started by taking the first 334 lines of Run_plastma_deconts_and_preds.R
 
 # install.packages('splitstackshape', repos='http://cran.us.r-project.org')
-library(splitstackshape)
+# library(splitstackshape)
 library(tidyverse)
-library(biomformat) 
+# library(biomformat) 
 library(vegan)
 library(glmnet)
 library(torch)
@@ -15,7 +15,6 @@ seed=3
 # for(seed in 0:2){
 
 set.seed(seed)
-
 message(paste('running using seed:', seed))
 
 suppressWarnings({
