@@ -24,6 +24,7 @@ echo "Date/Time: $(date)"
 echo "before-decontamination.R ..."
 Rscript ivory/before-decontamination.R 
 
+echo "\n=========================================================\n"
 echo "decontaminate_SCRuB.R ..."
 Rscript ivory/decontaminate_SCRuB.R 
 

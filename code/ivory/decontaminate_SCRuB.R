@@ -46,6 +46,7 @@ dim(unique_metadata)
 useRPackage = T
 if (useRPackage){
     library(SCRuB)
+    packageVersion("SCRuB")
     
     control_types = c('control blank library prep', 'control blank DNA extraction')
     unique_metadata$is_control = unique_metadata$sample_type %in% control_types
@@ -70,7 +71,7 @@ if (useRPackage){
         message("Plate has controls: ", numControls)
         
         if (numControls > 0 ){
-            scrub_output = SCRuB(plate_data, metadata = plate_meta)
+            scrub_output = SCRuB::SCRuB(plate_data, metadata = plate_meta)
             
             # decontaminated data
             scrub_out_list[[plate]] <- scrub_output$decontaminated_samples
