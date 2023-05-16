@@ -21,11 +21,12 @@ echo "Date/Time: $(date)"
 
 # drafting my own version with more broken out pieces...
 
-echo "before-decontamination.R ..."
+echo -e "\n=========================================================\n"
+echo -e "before-decontamination.R ... \n"
 Rscript ivory/before-decontamination.R 
 
-echo "\n=========================================================\n"
-echo "decontaminate_SCRuB.R ..."
+echo -e "\n=========================================================\n"
+echo -e "decontaminate_SCRuB.R ... \n"
 Rscript ivory/decontaminate_SCRuB.R 
 
 
