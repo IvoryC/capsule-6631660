@@ -8,7 +8,7 @@ library(tidyverse)
 library(vegan)
 library(glmnet)
 library(torch)
-# install_torch()
+install_torch()
 
 sessionInfo()
 
