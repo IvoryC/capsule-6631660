@@ -23,20 +23,34 @@ suppressWarnings({
 
 #### read data ####
 
-unique_samps <- read.csv("../results/data/ivory/before-decontamination/unique_samps.csv", row.names = 1)
-message("unique_samps.csv has dimentions:")
-dim(unique_samps)
+# unique_samps <- read.csv("../results/data/ivory/before-decontamination/unique_samps.csv", row.names = 1)
+# message("unique_samps.csv has dimentions:")
+# dim(unique_samps)
 
-# metadata must include columns: "sample_type", "sample_well", "sample_plate"
-unique_metadata <- read.csv("../results/data/ivory/before-decontamination/unique_metadata.csv", row.names = 1)
-message("unique_metadata.csv has dimentions:")
-dim(unique_metadata)
+full_df = read.csv("../results/data/ivory/before-decontamination/full_df.csv", row.names = 1)
+message("full_df.csv has dimentions:")
+dim(full_df)
+
+## metadata must include columns: "sample_type", "sample_well", "sample_plate"
+# unique_metadata <- read.csv("../results/data/ivory/before-decontamination/unique_metadata.csv", row.names = 1)
+# message("unique_metadata.csv has dimentions:")
+# dim(unique_metadata)
+metadata <- read.csv('../data/Fig4_plasma/47212_47212_analysis_mapping.txt', sep='\t')
+row.names(metadata) = metadata$X.SampleID
+message("metadata has dimentions:")
+dim(metadata)
+
+sample_intersect = intersect(row.names(metadata), 
+                             row.names(full_df))
+
+full_df = full_df[sample_intersect, ]
+metadata = metadata[sample_intersect, ]
 
 # These lines were not needed when using R version 4.2.2 (2022-10-31), 
 # but without them I hit errors when using R version 3.6.3 (2020-02-29)
-unique_metadata$sample_plate = as.character(unique_metadata$sample_plate)
-unique_metadata$sample_type = as.character(unique_metadata$sample_type)
-unique_metadata$sample_well = as.character(unique_metadata$sample_well)
+# unique_metadata$sample_plate = as.character(unique_metadata$sample_plate)
+# unique_metadata$sample_type = as.character(unique_metadata$sample_type)
+# unique_metadata$sample_well = as.character(unique_metadata$sample_well)
 
 # Actually.... we just get this from the meta data.
 # well_dists <- read.csv("../results/data/ivory/before-decontamination/well_dists.csv", row.names = 1, check.names = F)
@@ -59,12 +73,12 @@ for (trialNumber in 1:numTrials){
     # I thought I would need to run SCRuB for each contamination source, 
     # but it looks like SCRuB internalizes that iteration process.
     control_types = c('control blank library prep', 'control blank DNA extraction')
-    unique_metadata$is_control = unique_metadata$sample_type %in% control_types
+    metadata$is_control = metadata$sample_type %in% control_types
     
     # Note: This decontaminates per plate. And one plate, is not decontaminated all. But the well location info is optional.  
     #       Could I instead decontaminate the whole data set as one if I just ignore the well location info?
     
-    plate_meta_split = split(unique_metadata, f=unique_metadata$sample_plate)
+    plate_meta_split = split(metadata, f=metadata$sample_plate)
     message("SCRuB the ", length(plate_meta_split), " plates separately.")
     
     scrub_out_list = list()
@@ -72,7 +86,7 @@ for (trialNumber in 1:numTrials){
     for (plate in names(plate_meta_split)){
         message("SCRuB-ing plate ", plate)
         plate_meta = plate_meta_split[[plate]]
-        plate_data = unique_samps[row.names(plate_meta),]
+        plate_data = full_df[row.names(plate_meta),]
         
         # limit metadata to the EXACT three columns permitted.
         plate_meta = plate_meta[,c("is_control", "sample_type", "sample_well")]
@@ -82,7 +96,7 @@ for (trialNumber in 1:numTrials){
         # so skip any plate with 0 controls
         numControls = sum(plate_meta$is_control)
         message("Plate has controls: ", numControls)
-        message(paste(row.names(plate_meta)[which(plate_meta$is_control)], collapse=", "))
+        message(paste(row.names(plate_meta)[plate_meta$is_control], collapse=", "))
         
         if (numControls > 0 ){
             scrub_output = SCRuB::SCRuB(plate_data, metadata = plate_meta)
