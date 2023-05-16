@@ -64,15 +64,15 @@ for (trialNumber in 1:numTrials){
     # Note: This decontaminates per plate. And one plate, is not decontaminated all. But the well location info is optional.  
     #       Could I instead decontaminate the whole data set as one if I just ignore the well location info?
     
-    plates = unique(unique_metadata$sample_plate)
-    message("SCRuB the ", length(plates), " plates separately.")
+    plate_meta_split = split(unique_metadata, f=unique_metadata$sample_plate)
+    message("SCRuB the ", length(plate_meta_split), " plates separately.")
     
     scrub_out_list = list()
     
-    for (plate in plates){
+    for (plate in names(plate_meta_split)){
         message("SCRuB-ing plate ", plate)
-        plate_meta = unique_metadata[unique_metadata$sample_plate == plate,]
-        plate_data = unique_samps[row.names(unique_samps) %in% row.names(plate_meta),]
+        plate_meta = plate_meta_split[[plate]]
+        plate_data = unique_samps[row.names(plate_meta),]
         
         # limit metadata to the EXACT three columns permitted.
         plate_meta = plate_meta[,c("is_control", "sample_type", "sample_well")]
@@ -82,7 +82,7 @@ for (trialNumber in 1:numTrials){
         # so skip any plate with 0 controls
         numControls = sum(plate_meta$is_control)
         message("Plate has controls: ", numControls)
-        message(paste(row.names(plate_meta)[plate_meta$is_control], collapse=", "))
+        message(paste(row.names(plate_meta)[which(plate_meta$is_control)], collapse=", "))
         
         if (numControls > 0 ){
             scrub_output = SCRuB::SCRuB(plate_data, metadata = plate_meta)
