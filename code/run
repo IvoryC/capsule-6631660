@@ -28,6 +28,11 @@ Rscript ivory/before-decontamination.R
 
 echo -e "\n=========================================================\n"
 echo "Date/Time: $(date)"
+echo -e "decontaminate_not.R ... \n"
+Rscript ivory/decontaminate_not.R
+
+echo -e "\n=========================================================\n"
+echo "Date/Time: $(date)"
 echo -e "decontaminate_SCRuB.R ... \n"
 Rscript ivory/decontaminate_SCRuB.R 2
 
