@@ -7,6 +7,19 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 
+# install.packages("remotes")
+# remotes::install_github("nchlis/pca.utils")
+# library("pca.utils")
+#
+# not sure why I have problems loading this library. This is the function we use from it:
+project_pca <- function (Xnew = NULL, pc = NULL) 
+{
+    string = "Plesae cite github('nchlis/pca.utils') see: https://rdrr.io/github/nchlis/pca.utils/man/project_pca.html"
+    message(string); print(string)
+    return(scale(Xnew, pc$center, pc$scale) %*% pc$rotation)
+}
+
+
 sessionInfo()
 
 #### read meta data ####
@@ -40,86 +53,11 @@ categories = c("Control", "SKCM")
 
 hasCat = metadataPSMatchedDPQCFiltered$disease_type_consol %in% categories
 nameHasCat = row.names(metadataPSMatchedDPQCFiltered)[which(hasCat)]
-# metaCat = metadataPSMatchedDPQCFiltered[nameHasCat, ]
+
+# interest point... is it better to train on only the categories of interest? or on all data?
 # datasub = data[nameHasCat, ]
 
-##### pcoa #####
-dd = vegan::vegdist(train)
-# dd = vegan::vegdist(data)
-
-res = ape::pcoa(dd)
-
-# bioplot(res)
-
-axes = res$vectors
-
-pcoaDF = merge(axes, metadataPSMatchedDPQCFiltered, by=0)
-row.names(pcoaDF) = pcoaDF$Row.names
-pcoaDF = pcoaDF %>% select(-Row.names)
-
-plot1 = ggplot2::ggplot(data=pcoaDF[nameHasCat,]) +
-    geom_point(mapping = aes(x=Axis.1, y=Axis.2, color = disease_type)) +
-    ggtitle("PCoA")
-#plot1
-                        
-plot2 = ggplot2::ggplot(data=pcoaDF[nameHasCat,]) +
-    geom_point(mapping = aes(x=Axis.3, y=Axis.4, color = disease_type_consol)) +
-    ggtitle("PCoA")
-#plot2
-
-axisSet = colnames(axes)
-if (length(axisSet) > 12) axisSet = axisSet[1:12]
-
-
-##### pcoa boxplot #####
-
-d4 = pcoaDF %>% 
-    filter(disease_type_consol %in% categories) %>% 
-    select(axisSet, disease_type_consol) %>% 
-    gather("value", key="Axis", -disease_type_consol) %>%
-    mutate(axisNum = as.numeric(gsub("Axis.", "", Axis))) %>%
-    arrange(axisNum) 
-
-d5 = d4 %>%
-    arrange(axisNum) %>%
-    mutate(Axis = factor(Axis, levels=unique(Axis))) %>%
-    select(-axisNum)
-
-# plot3 = ggplot2::ggplot(data=d4) +
-#     geom_boxplot(mapping = aes(x=Axis, y=value, color = disease_type_consol)) +
-#     ggtitle("PCoA values split by sample type")
-# plot3
-
-plot4 = ggplot2::ggplot(data=d5) +
-    geom_boxplot(mapping = aes(y=value, x=disease_type_consol, color = disease_type_consol)) +
-    ggtitle("PCoA values split by sample type") +
-    facet_wrap(~Axis, nrow=3)
-#plot4
-
-##### pcoa choose best #####
-# Choose the single best axis for separating the data.
-axisPs = sapply(axisSet, function(ax) {
-    t.test(data=d4 %>% filter(Axis == ax), 
-           value ~ disease_type_consol)$p.value
-})
-bestAxis = names(axisPs)[which(axisPs == min(axisPs))]
-message("Axis ", bestAxis, " is the best at separating ", paste(categories, collapse=" from "))
-
-# highlight the best axis in the plot
-plot6 = plot4 +
-    geom_rect(data = subset(d5, Axis == bestAxis), 
-              fill = NA, colour = "red", 
-              xmin = -Inf,xmax = Inf, ymin = -Inf,ymax = Inf)
-plot6
-
-# define the model,
-# To the values for this 'axis' use the vector
-
-##### pcoa test sample #####
-
-# ruh-roh
-
-#### prcomp ####
+##### prcomp #####
 
 res = stats::prcomp(train)
 
@@ -151,6 +89,7 @@ d4 = pcDF %>%
     mutate(axisNum = as.numeric(gsub("PC", "", PC))) %>%
     arrange(axisNum) 
 
+# reset the factor levels so that the plots appear in order
 d5 = d4 %>%
     arrange(axisNum) %>%
     mutate(PC = factor(PC, levels=unique(PC))) %>%
@@ -185,33 +124,24 @@ plot6
 plotFile = sub(inputPattern, "_prcomp-boxplot.png", infile)
 ggsave(plotFile, plot=plot6)
 
-##### prcomp test sample #####
+#### test sample ####
 
 ###### sanity check ######
-
-# pc1 rotation values (1 per taxon)
-pc1.rot = res$rotation[,"PC1"]
-# pc1 values (1 per sample)
-pc1.vals = res$x[,"PC1"]
-
-# sample name
-train1 = row.names(train)[1]
-# taxa counts for that sample
-train1.dat = unlist(data[train1,])
-
-# single value, the pc1 value for the first train sample
-pc1.vals[train1]
-
-# ....how to translate those vectors into that one value...
-tp = train1.dat * pc1.rot
-
 
 # from https://rdrr.io/github/nchlis/pca.utils/man/project_pca.html
 # install.packages("remotes")
 # remotes::install_github("nchlis/pca.utils")
-pro.check = pca.utils::project_pca(Xnew = data[train1,], pc = res)
-pro.check[,"PC1"] == pc1.vals[train1]
+#
+# example: pca.utils::project_pca(Xnew = NULL, pc = NULL)
+pro.check = project_pca(Xnew = data[train1,], pc = res)
+pro.check[,"PC1"] == res$x[,"PC1"][train1]
+# TRUE #--yay!
 
+### the project_pca function is very straight forward:
+# function (Xnew = NULL, pc = NULL) 
+# {
+#     return(scale(Xnew, pc$center, pc$scale) %*% pc$rotation)
+# }
 
 ###### actual test ######
 
@@ -231,6 +161,12 @@ claims = claims[order(claims, decreasing = T)]
 # which category had the highest p? that's our prediction.
 predict = names(claims)[1]
 confidenceP = claims[2]
+
+realCategory = metadataPSMatchedDPQCFiltered[test1,"disease_type_consol"]
+isCorrect = predict == realCategory
+correctOrNot = ifelse(isCorrect, "CORRECT", paste0("WRONG (is actually ", realCategory, ")"))
+
+message("We predict (with confidence p=", round(confidenceP,3),") that sample [", test1, "] belongs in category [", predict, "], which is ", correctOrNot, "." )
 
 
 message("Done!")
