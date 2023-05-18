@@ -119,8 +119,8 @@ for (trialNumber in 1:numTrials){
     dim(scrub_df)
     
     numBlanks = sum(meta$is_control)
-    resDir = file.path(mainResultsDir, paste0("SCRuB_noPlate_", numBlanks, "-blanks"), paste0("trial_", trialNumber))
-    #resDir = paste0("../results/data/ivory/decontamination/SCRuB_noPlate_", numBlanks, "-blanks/trial_", trialNumber)
+    resDir = file.path(mainResultsDir, paste0("SCRuB-noPlate_", numBlanks, "-blanks"), paste0("trial_", trialNumber))
+    #resDir = paste0("../results/data/ivory/decontamination/SCRuB-noPlate_", numBlanks, "-blanks/trial_", trialNumber)
     suppressWarnings({dir.create(resDir, recursive = T)})
     file = file.path(resDir, "scrub_decontaminated.csv")
     message("Saving scrubbed data as: ", file)
