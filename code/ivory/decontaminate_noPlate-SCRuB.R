@@ -57,11 +57,11 @@ metadata$sample_plate = as.character(metadata$sample_plate)
 metadata$sample_type = as.character(metadata$sample_type)
 metadata$sample_well = as.character(metadata$sample_well)
 
+# only use samples that have data and metadata
 sample_intersect = intersect(row.names(metadata), 
                              row.names(full_df))
-
-counts = full_df[sample_intersect, ]
-meta = metadata[sample_intersect, ]
+full_df = full_df[sample_intersect, ]
+metadata = metadata[sample_intersect, ]
 
 mainResultsDir = "../results/data/ivory/decontamination"
 message("Results will be saved under: ", mainResultsDir)
@@ -74,6 +74,10 @@ for (trialNumber in 1:numTrials){
     seed = trialNumber * 29
     message(paste('Using seed:', seed))
     set.seed(seed)
+    
+    # reset in case metadata was reduced in previous trial
+    meta = metadata 
+    counts = full_df
     
     control_types = c('control blank library prep', 'control blank DNA extraction')
     meta$is_control = meta$sample_type %in% control_types
