@@ -34,8 +34,8 @@ if (length(args) > 0) {
     key = sapply(args2, function(x) x[[1]])
     argVals = sapply(args2, function(x) x[[2]])
     names(argVals) = key
-    if ("trials" %in% key) numTrials = argVals["trials"]
-    if ("dropBlanks" %in% key) dropBlanks = argVals["dropBlanks"]
+    if ("trials" %in% key) numTrials = as.numeric(argVals["trials"])
+    if ("dropBlanks" %in% key) dropBlanks = as.numeric(argVals["dropBlanks"])
 }
 message("Will run ", numTrials, " trials.")
 message("In each trial, will subsample to remove proportion of blanks: ", dropBlanks)
