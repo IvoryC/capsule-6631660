@@ -12,10 +12,10 @@ library(ggplot2)
 # library("pca.utils")
 #
 # not sure why I have problems loading this library. This is the function we use from it:
+string = "Plesae cite github('nchlis/pca.utils') see: https://rdrr.io/github/nchlis/pca.utils/man/project_pca.html"
+message(string); print(string)
 project_pca <- function (Xnew = NULL, pc = NULL) 
 {
-    string = "Plesae cite github('nchlis/pca.utils') see: https://rdrr.io/github/nchlis/pca.utils/man/project_pca.html"
-    message(string); print(string)
     return(scale(Xnew, pc$center, pc$scale) %*% pc$rotation)
 }
 
@@ -31,9 +31,6 @@ metadataPSMatchedDPQCFiltered <- read.csv('../data/Fig4_plasma/Metadata-Plasma-F
 decontaminationFolder = "../results/data/ivory/decontamination"
 inputPattern = "_vsnm.csv"
 infiles = dir(decontaminationFolder, pattern=inputPattern, full.names = T, recursive = T)
-
-## raed data --- later do this in loop
-infiles = infiles[3]
 
 for (infile in infiles){
     

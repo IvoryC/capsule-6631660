@@ -48,9 +48,8 @@ Rscript ivory/post-decont-vsnm-and-diversity.R
 
 echo -e "\n=========================================================\n"
 echo "Date/Time: $(date)"
-echo -e "trainModel.R ... \n"
-Rscript ivory/trainModel.R
-
+echo -e "alt-ML.R ... \n"
+Rscript ivory/alt-ML.R
 
 
 
