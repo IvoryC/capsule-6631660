@@ -2,6 +2,8 @@
 #### libraries ####
 
 library(vegan)
+is_ape_available <- require("ape")
+if (!is_ape_available) install.packages("ape")
 library(ape)
 library(tidyr)
 library(dplyr)
