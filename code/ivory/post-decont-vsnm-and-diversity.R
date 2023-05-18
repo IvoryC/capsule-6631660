@@ -1,7 +1,7 @@
 
 # This draft started by taking a chunk from Run_plastma_deconts_and_preds.R
 
-# install.packages('splitstackshape', repos='http://cran.us.r-project.org')
+if (!is_installed("splitstackshape")) install.packages('splitstackshape', repos='http://cran.us.r-project.org')
 library(splitstackshape)
 library(tidyverse)
 library(biomformat) 
@@ -12,8 +12,8 @@ library(torch)
 # install_torch()
 
 ## Load packages ##
-require(limma)
-require(edgeR)
+# require(limma)
+# require(edgeR)
 require(dplyr)
 require(snm)
 require(doMC)
@@ -24,11 +24,12 @@ require(parallel)
 
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-# BiocManager::install("snm")
-# BiocManager::install("edgeR")
-# BiocManager::install("limma")
+
+if (!is_installed("edgeR")) BiocManager::install("edgeR")
 require(edgeR)
+if (!is_installed("limma")) BiocManager::install("limma")
 require(limma)
+
 
 sessionInfo()
 
