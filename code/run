@@ -32,14 +32,29 @@ echo -e "decontaminate_not.R ... \n"
 Rscript ivory/decontaminate_not.R
 
 echo -e "\n=========================================================\n"
-echo "Date/Time: $(date)"
-echo -e "decontaminate_SCRuB.R ... \n"
-Rscript ivory/decontaminate_SCRuB.R 2
+if [  1 -eq 0 ] 
+then   
+	echo "Date/Time: $(date)"
+	echo -e "decontaminate_SCRuB.R ... \n"
+	Rscript ivory/decontaminate_SCRuB.R 2
+else
+	echo "Skipping decontaminate_SCRuB.R."
+fi
 
 echo -e "\n=========================================================\n"
 echo "Date/Time: $(date)"
-echo -e "decontaminate_SCRuB.R ... \n"
-Rscript ivory/decontaminate_noPlate-SCRuB.R 2
+echo -e "decontaminate_noPlate-SCRuB.R ... \n"
+Rscript ivory/decontaminate_noPlate-SCRuB.R trials=2 dropBlanks=0
+
+echo -e "\n=========================================================\n"
+echo "Date/Time: $(date)"
+echo -e "decontaminate_noPlate-SCRuB.R ... \n"
+Rscript ivory/decontaminate_noPlate-SCRuB.R trials=2 dropBlanks=.3
+
+echo -e "\n=========================================================\n"
+echo "Date/Time: $(date)"
+echo -e "decontaminate_noPlate-SCRuB.R ... \n"
+Rscript ivory/decontaminate_noPlate-SCRuB.R trials=2 dropBlanks=.6
 
 echo -e "\n=========================================================\n"
 echo "Date/Time: $(date)"
