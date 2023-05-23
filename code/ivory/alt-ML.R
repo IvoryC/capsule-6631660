@@ -30,6 +30,7 @@ metadataPSMatchedDPQCFiltered <- read.csv('../data/Fig4_plasma/Metadata-Plasma-F
 
 #### find input data files ####
 
+#decontaminationFolder = "../results--devRuns/data/ivory/decontamination"
 decontaminationFolder = "../results/data/ivory/decontamination"
 inputPattern = "_vsnm.csv"
 infiles = dir(decontaminationFolder, pattern=inputPattern, full.names = T, recursive = T)
