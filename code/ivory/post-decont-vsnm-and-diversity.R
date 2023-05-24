@@ -1,34 +1,40 @@
 
 # This draft started by taking a chunk from Run_plastma_deconts_and_preds.R
 
-if (!is_installed("splitstackshape")) install.packages('splitstackshape', repos='http://cran.us.r-project.org')
-library(splitstackshape)
-library(tidyverse)
-library(biomformat) 
-library(vegan)
-library(glmnet)
-library(torch)
+# for each library, install it if needed
+load.library <- function(lib){
+    if (!require(lib, character.only = TRUE)) install.packages(lib, repos='http://cran.us.r-project.org')
+    library(lib, character.only = TRUE)
+}
+load.library(splitstackshape)
+load.library(tidyverse)
+load.library(biomformat) 
+load.library(vegan)
+load.library(glmnet)
+load.library(torch)
 # library(microDecon)
 # install_torch()
 
 ## Load packages ##
 # require(limma)
 # require(edgeR)
-require(dplyr)
-require(snm)
-require(doMC)
-require(tibble)
-require(gbm)
+load.library(dplyr)
+load.library(snm)
+load.library(doMC)
+load.library(tibble)
+load.library(gbm)
 
-require(parallel)
+load.library(parallel)
 
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-if (!is_installed("edgeR")) BiocManager::install("edgeR")
-require(edgeR)
-if (!is_installed("limma")) BiocManager::install("limma")
-require(limma)
+load.bioc.library <- function(lib){
+    if (!require(lib, character.only = TRUE)) BiocManager::install(lib)
+    library(lib, character.only = TRUE)
+}
+load.bioc.library("edgeR")
+load.bioc.library("limma")
 
 
 sessionInfo()
