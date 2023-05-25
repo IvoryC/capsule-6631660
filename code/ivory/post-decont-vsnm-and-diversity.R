@@ -6,25 +6,20 @@ load.library <- function(lib){
     if (!require(lib, character.only = TRUE)) install.packages(lib, repos='http://cran.us.r-project.org')
     library(lib, character.only = TRUE)
 }
-load.library(splitstackshape)
-load.library(tidyverse)
-load.library(biomformat) 
-load.library(vegan)
-load.library(glmnet)
-load.library(torch)
+load.library("splitstackshape")
+load.library("tidyverse")
+load.library("biomformat") 
+load.library("vegan")
+load.library("glmnet")
+load.library("torch")
 # library(microDecon)
 # install_torch()
 
 ## Load packages ##
-# require(limma)
-# require(edgeR)
-load.library(dplyr)
-load.library(snm)
-load.library(doMC)
-load.library(tibble)
-load.library(gbm)
-
-load.library(parallel)
+load.library("dplyr")
+load.library("doMC")
+load.library("tibble")
+load.library("parallel")
 
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
@@ -35,6 +30,8 @@ load.bioc.library <- function(lib){
 }
 load.bioc.library("edgeR")
 load.bioc.library("limma")
+load.bioc.library("snm")
+load.bioc.library("gbm")
 
 
 sessionInfo()
@@ -157,10 +154,7 @@ for (infile in infiles){
 #### diversity summary ####
 
 suppressWarnings({
-    dir.create("../results")
-    dir.create("../results/data")
-    dir.create("../results/data/ivory")
-    dir.create("../results/data/ivory/shannon_diversity") 
+    dir.create("../results/data/ivory/shannon_diversity", recursive = TRUE) 
 })
 
 shortNames = sub(decontaminationFolder, "", names(diversitySummary))

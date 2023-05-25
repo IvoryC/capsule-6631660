@@ -1,24 +1,15 @@
 
-# This draft started by taking the first sevearl lines of Run_plastma_deconts_and_preds.R
+# This draft started by taking the first several lines of Run_plastma_deconts_and_preds.R
 # Assumes the working dir is capsule<capsule_id>/code/
 
-# install.packages('splitstackshape', repos='http://cran.us.r-project.org')
-
-# library(splitstackshape)
 library(tidyverse)
 library(biomformat) 
-# library(vegan)
-# library(glmnet)
-# library(torch)
 
 sessionInfo()
 
 #### a place to save data ####
 suppressWarnings({
-    dir.create("../results")
-    dir.create("../results/data")
-    dir.create("../results/data/ivory")
-    dir.create("../results/data/ivory/before-decontamination") 
+    dir.create("../results/data/ivory/before-decontamination", recursive = TRUE) 
 })
 
 #### as is files ####

@@ -1,4 +1,5 @@
 /data/
+/results/
 
 environment/env_old.yml
 .DS_Store

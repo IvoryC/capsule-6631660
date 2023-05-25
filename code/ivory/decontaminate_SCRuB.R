@@ -1,24 +1,25 @@
 
 # This draft started by taking the first 334 lines of Run_plastma_deconts_and_preds.R
 
-# install.packages('splitstackshape', repos='http://cran.us.r-project.org')
-# library(splitstackshape)
-library(tidyverse)
-# library(biomformat) 
+if (!require(vegan)) install.packages(vegan, repos='http://cran.us.r-project.org')
 library(vegan)
+if (!require(splitstackshape)) install.packages("splitstackshape", repos='http://cran.us.r-project.org')
+library(splitstackshape)
+# required for SCRuB
+if (!require(tidyverse)) install.packages("tidyverse", repos='http://cran.us.r-project.org')
+library(tidyverse)
+if (!require(glmnet)) install.packages("glmnet", repos='http://cran.us.r-project.org')
 library(glmnet)
+if (!require(torch)) install.packages("torch", repos='http://cran.us.r-project.org')
 library(torch)
 install_torch()
+if (!require(SCRuB)) devtools::install_github("shenhav-and-korem-labs/SCRuB")
 library(SCRuB)
 
 sessionInfo()
 
 suppressWarnings({
-    dir.create("../results")
-    dir.create("../results/data")
-    dir.create("../results/data/ivory")
-    dir.create("../results/data/ivory/decontamination")
-    dir.create("../results/data/ivory/decontamination/SCRuB")
+    dir.create("../results/data/ivory/decontamination/SCRuB", recursive = TRUE)
 })
 
 #### read data ####

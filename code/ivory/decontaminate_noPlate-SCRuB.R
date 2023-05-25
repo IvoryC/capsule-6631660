@@ -9,14 +9,20 @@
 
 #### libraries ####
 
-# install.packages('splitstackshape', repos='http://cran.us.r-project.org')
-# library(splitstackshape)
-library(tidyverse)
-# library(biomformat) 
+if (!require(vegan)) install.packages(vegan, repos='http://cran.us.r-project.org')
 library(vegan)
+if (!require(splitstackshape)) install.packages("splitstackshape", repos='http://cran.us.r-project.org')
+library(splitstackshape)
+
+# required for SCRuB
+if (!require(tidyverse)) install.packages("tidyverse", repos='http://cran.us.r-project.org')
+library(tidyverse)
+if (!require(glmnet)) install.packages("glmnet", repos='http://cran.us.r-project.org')
 library(glmnet)
+if (!require(torch)) install.packages("torch", repos='http://cran.us.r-project.org')
 library(torch)
 install_torch()
+if (!require(SCRuB)) devtools::install_github("shenhav-and-korem-labs/SCRuB")
 library(SCRuB)
 
 sessionInfo()

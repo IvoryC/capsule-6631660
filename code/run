@@ -3,13 +3,7 @@
 
 echo "Start Date/Time: $(date)"
 
-mkdir ../results/data
-mkdir ../results/data/Fig_3
-mkdir ../results/data/Fig_3/decontaminated-samples
-mkdir ../results/Plots
-mkdir ../results/Plots/fig_3
-mkdir ../results/Supplementary_figures
-mkdir ../results/Supplementary_figures/F_S10
+mkdir ../results/
 
 
 echo "Date/Time: $(date)"

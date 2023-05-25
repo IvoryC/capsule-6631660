@@ -2,8 +2,7 @@
 #### libraries ####
 
 library(vegan)
-is_ape_available <- require("ape")
-if (!is_ape_available) install.packages("ape")
+if (!require(ape)) install.packages("ape")
 library(ape)
 library(tidyr)
 library(dplyr)
@@ -163,7 +162,7 @@ for (infile in infiles){
     
     ###### actual test ######
     
-    pro.test = pca.utils::project_pca(Xnew = data[test1,], pc = res)
+    pro.test = project_pca(Xnew = data[test1,], pc = res)
     pro.test.val = pro.test[,bestAxis]
     
     

@@ -1,24 +1,12 @@
 
 # This draft started by taking the first 334 lines of Run_plastma_deconts_and_preds.R
 
-# install.packages('splitstackshape', repos='http://cran.us.r-project.org')
-# library(splitstackshape)
 library(tidyverse)
-# library(biomformat) 
-library(vegan)
-library(glmnet)
-library(torch)
-install_torch()
-library(SCRuB)
 
 sessionInfo()
 
 suppressWarnings({
-    dir.create("../results")
-    dir.create("../results/data")
-    dir.create("../results/data/ivory")
-    dir.create("../results/data/ivory/decontamination")
-    dir.create("../results/data/ivory/decontamination/raw")
+    dir.create("../results/data/ivory/decontamination/raw", recursive = TRUE)
 })
 
 #### read data ####
