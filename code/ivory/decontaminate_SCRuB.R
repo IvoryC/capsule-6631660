@@ -18,8 +18,9 @@ library(SCRuB)
 
 sessionInfo()
 
+scriptResultsDir = "../results/data/ivory/decontamination/SCRuB-byPlate"
 suppressWarnings({
-    dir.create("../results/data/ivory/decontamination/SCRuB", recursive = TRUE)
+    dir.create(scriptResultsDir, recursive = TRUE)
 })
 
 #### read data ####
@@ -108,11 +109,24 @@ for (trialNumber in 1:numTrials){
     message("scrub_df has dimensions:")
     dim(scrub_df)
     
-    resDir = paste0("../results/data/ivory/decontamination/SCRuB/trial_", trialNumber)
+    #### write methods and results ####
+    METHODS=c(decontaminationTool="SCRuB-byPlate", 
+              blankType=paste(control_types, collapse=","), 
+              numberBlanks=sum(metadata$is_control), 
+              trialNumber=trialNumber, 
+              seed=seed)
+    
+    resDir = file.path(scriptResultsDir, paste0("trial_", trialNumber))
     suppressWarnings({dir.create(resDir)})
     file = file.path(resDir, "scrub_decontaminated.csv")
     message("Saving scrubbed data as: ", file)
-    write.csv(scrub_df, file)
+    
+    # write methods and results to the same file
+    commentLines = paste0("#METHODS ", paste(names(METHODS), METHODS, sep="="))
+    writeLines(commentLines, file)
+    suppressWarnings({
+      write.table(scrub_df, file=file, append=TRUE, quote=F, sep=",")
+      })
     
 }
 

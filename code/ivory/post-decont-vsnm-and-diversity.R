@@ -133,7 +133,12 @@ vsnm <- function(qcData, infile){
     dev.off()
     outfile = sub("decontaminated.csv", "decontaminated_vsnm.csv", infile)
     message("Saving file: ", outfile)
-    write.csv(snmData, outfile)
+    
+    commentLines = readLines(infile, n=30) %>% grep(pattern="#METHODS", value = TRUE)
+    writeLines(commentLines, outfile)
+    suppressWarnings({
+      write.table(snmData, file=outfile, append=TRUE, quote=F, sep=",")
+    })
 }
 
 #### do for each file ####
@@ -144,7 +149,7 @@ diversitySummary = data.frame(row.names=sampleSet)
 
 for (infile in infiles){
     message("Processing file: ", infile)
-    indata = read.csv(infile, row.names = 1)
+    indata = read.csv(infile, row.names = 1, comment.char = "#")
     diver = calcDiversity(indata[sampleSet, ], infile)
     diversitySummary[,infile] = diver[sampleSet]
     normed <- vsnm(indata[sampleSet, ], infile)

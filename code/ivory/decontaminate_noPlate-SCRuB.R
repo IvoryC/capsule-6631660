@@ -69,8 +69,13 @@ sample_intersect = intersect(row.names(metadata),
 full_df = full_df[sample_intersect, ]
 metadata = metadata[sample_intersect, ]
 
-mainResultsDir = "../results/data/ivory/decontamination"
-message("Results will be saved under: ", mainResultsDir)
+
+
+scriptResultsDir = "../results/data/ivory/decontamination/SCRuB-noPlate"
+suppressWarnings({
+  dir.create(scriptResultsDir, recursive = TRUE)
+})
+message("Results will be saved under: ", scriptResultsDir)
 
 #### run through SCRuB ####
 
@@ -124,13 +129,25 @@ for (trialNumber in 1:numTrials){
     message("scrub_df has dimensions:")
     dim(scrub_df)
     
+    #### write methods and results ####
+    METHODS=c(decontaminationTool="SCRuB-noPlate", 
+              blankType=paste(control_types, collapse=","), 
+              numberBlanks=sum(meta$is_control), 
+              trialNumber=trialNumber, 
+              seed=seed)
+    
     numBlanks = sum(meta$is_control)
-    resDir = file.path(mainResultsDir, paste0("SCRuB-noPlate_", numBlanks, "-blanks"), paste0("trial_", trialNumber))
-    #resDir = paste0("../results/data/ivory/decontamination/SCRuB-noPlate_", numBlanks, "-blanks/trial_", trialNumber)
+    resDir = file.path(scriptResultsDir, paste0("SCRuB-noPlate_", numBlanks, "-blanks"), paste0("trial_", trialNumber))
     suppressWarnings({dir.create(resDir, recursive = T)})
     file = file.path(resDir, "scrub_decontaminated.csv")
     message("Saving scrubbed data as: ", file)
-    write.csv(scrub_df, file)
+    
+    # write methods and results to the same file
+    commentLines = paste0("#METHODS ", paste(names(METHODS), METHODS, sep="="))
+    writeLines(commentLines, file)
+    suppressWarnings({
+      write.table(scrub_df, file=file, append=TRUE, quote=F, sep=",")
+    })
     
 }
 

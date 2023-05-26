@@ -29,7 +29,6 @@ metadataPSMatchedDPQCFiltered <- read.csv('../data/Fig4_plasma/Metadata-Plasma-F
 
 #### find input data files ####
 
-#decontaminationFolder = "../results--devRuns/data/ivory/decontamination"
 decontaminationFolder = "../results/data/ivory/decontamination"
 inputPattern = "_vsnm.csv"
 infiles = dir(decontaminationFolder, pattern=inputPattern, full.names = T, recursive = T)
@@ -37,7 +36,7 @@ infiles = dir(decontaminationFolder, pattern=inputPattern, full.names = T, recur
 for (infile in infiles){
     
     message("Reading data from file: ", infile)
-    data = read.csv(infile, row.names = 1)
+    data = read.csv(infile, row.names = 1, comment.char = "#")
     
     # save output with matching sub-directory structure
     predictionFolderBase = "../results/data/ivory/prediction"
@@ -194,14 +193,16 @@ for (infile in infiles){
     
     names(fileSummary) = c("sampleID", "actual", "prediction", "confidenceP")
     fileSummary$isCorrect = fileSummary$actual == fileSummary$prediction
-    summr = paste("Predictions were currect for", sum(fileSummary$isCorrect), "of", nrow(fileSummary), "leave-1-out samples.")
+    summr = paste("Predictions were correct for", sum(fileSummary$isCorrect), "of", nrow(fileSummary), "leave-1-out samples.")
     message(summr)
     
     tableFile = file.path(predictionFolder, sub(inputPattern, "_leave-1-out-prediction-summary.txt", basename(infile)))
     message("Saving file: ", tableFile)
-    writeLines(tableFile, text = paste("#", summr))
+    commentLines = readLines(infile, n=30) %>% grep(pattern="#METHODS", value = TRUE)
+    additionalComment = paste("#", summr)
+    writeLines(tableFile, text = c(additionalComment, commentLines))
     write.table(fileSummary, file=tableFile, quote=F, row.names = F, sep="\t", append=T)
-    rm(fileSummary)
+    rm(fileSummary, commentLines, additionalComment)
     
     dev.off()
     

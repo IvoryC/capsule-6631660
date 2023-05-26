@@ -30,24 +30,24 @@ if [  1 -eq 1 ]
 then   
 	echo "Date/Time: $(date)"
 	echo -e "decontaminate_SCRuB.R ... \n"
-	Rscript ivory/decontaminate_SCRuB.R 2
+	Rscript ivory/decontaminate_SCRuB.R 5
 else
 	echo "Skipping decontaminate_SCRuB.R."
 fi
 
 echo -e "\n=========================================================\n"
 echo "Date/Time: $(date)"
-echo -e "decontaminate_noPlate-SCRuB.R ... \n"
+echo -e "decontaminate_noPlate-SCRuB.R with all blanks... \n"
 Rscript ivory/decontaminate_noPlate-SCRuB.R trials=2 dropBlanks=0
 
 echo -e "\n=========================================================\n"
 echo "Date/Time: $(date)"
-echo -e "decontaminate_noPlate-SCRuB.R ... \n"
+echo -e "decontaminate_noPlate-SCRuB.R with some blanks... \n"
 Rscript ivory/decontaminate_noPlate-SCRuB.R trials=4 dropBlanks=.3
 
 echo -e "\n=========================================================\n"
 echo "Date/Time: $(date)"
-echo -e "decontaminate_noPlate-SCRuB.R ... \n"
+echo -e "decontaminate_noPlate-SCRuB.R with fewer blanks... \n"
 Rscript ivory/decontaminate_noPlate-SCRuB.R trials=6 dropBlanks=.6
 
 echo -e "\n=========================================================\n"
@@ -59,6 +59,11 @@ echo -e "\n=========================================================\n"
 echo "Date/Time: $(date)"
 echo -e "alt-ML.R ... \n"
 Rscript ivory/alt-ML.R
+
+echo -e "\n=========================================================\n"
+echo "Date/Time: $(date)"
+echo -e "asummarize_performance.R ... \n"
+Rscript summarize_performance.R
 
 
 

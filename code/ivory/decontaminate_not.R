@@ -5,8 +5,9 @@ library(tidyverse)
 
 sessionInfo()
 
+resDir = "../results/data/ivory/decontamination/raw/trial_0"
 suppressWarnings({
-    dir.create("../results/data/ivory/decontamination/raw", recursive = TRUE)
+    dir.create(resDir, recursive = TRUE)
 })
 
 #### read data ####
@@ -45,12 +46,26 @@ dim(counts)
 message("Filtering down to columns with sums > 500")
 counts_df <- counts[, (colSums(counts) > 500) %>% which]
 
-message("scrub_df has dimensions:")
+message("counts_df has dimensions:")
 dim(counts_df)
 
-file = "../results/data/ivory/decontamination/raw/not_decontaminated.csv"
-message("Saving scrubbed data as: ", file)
-write.csv(counts_df, file)
 
+
+#### write methods and results ####
+METHODS=c(decontaminationTool="no-decontamination", 
+          blankType=NA, 
+          numberBlanks=0, 
+          trialNumber=0, 
+          seed=NA)
+
+file=file.path(resDir, "not_decontaminated.csv")
+message("Saving non-scrubbed (raw) data as: ", file)
+
+# write methods and results to the same file
+commentLines = paste0("#METHODS ", paste(names(METHODS), METHODS, sep="="))
+writeLines(commentLines, file)
+suppressWarnings({
+  write.table(counts_df, file=file, append=TRUE, quote=F, sep=",")
+})
 
 message("Done!")
