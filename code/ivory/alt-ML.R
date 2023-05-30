@@ -32,6 +32,7 @@ metadataPSMatchedDPQCFiltered <- read.csv('../data/Fig4_plasma/Metadata-Plasma-F
 decontaminationFolder = "../results/data/ivory/decontamination"
 inputPattern = "_vsnm.csv"
 infiles = dir(decontaminationFolder, pattern=inputPattern, full.names = T, recursive = T)
+message("Found ", length(infiles), " input files.")
 
 for (infile in infiles){
   
@@ -185,6 +186,7 @@ for (infile in infiles){
   } #done test with sample
   
   names(fileSummary) = c("sampleID", "actual", "prediction", "confidenceP")
+  levels(fileSummary$prediction) = levels(fileSummary$actual)
   fileSummary$isCorrect = fileSummary$actual == fileSummary$prediction
   summr = paste("Predictions were correct for", sum(fileSummary$isCorrect), "of", nrow(fileSummary), "leave-1-out samples.")
   message(summr)
