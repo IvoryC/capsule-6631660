@@ -4,3 +4,5 @@
 environment/env_old.yml
 .DS_Store
 .Rproj.user
+.RData
+.Rhistory
