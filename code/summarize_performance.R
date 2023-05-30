@@ -90,23 +90,26 @@ ggsave(imgFile1, s1, device = png, units="in", width=6, height = 5)
 
 #### heatmap ####
 
-
-predStyles = gather(predAll, key="file", value="prediction", -sampleID)
-predStyles2 = merge(predStyles, allMethods, by.x="file", by.y=0, all.x = T)
-predStyles2 = predStyles2 %>% group_by(numberBlanks)
-
-tile = ggplot(predStyles2 %>% group_by(decontaminationTool, blankType, numberBlanks), 
-              aes(x=file, y=sampleID, fill=prediction)) +
-  geom_tile() +
-  facet_wrap(vars(numberBlanks),nrow = 1, scales="free_x") +
-  ggtitle(paste(unique(preds[[1]]$prediction), collapse=" vs "))
-tile
-
-imgFileTile = file.path(resultsDir, "sample-prediction-collorgrid.png")
-message("Saving image to: ", imgFileTile)
-ggsave(imgFileTile, tile, device = png, units="in", width=10, height = 10)
-
-
+if (FALSE){
+  
+  predStyles = gather(predAll, key="file", value="prediction", -sampleID)
+  predStyles2 = merge(predStyles, allMethods, by.x="file", by.y=0, all.x = T)
+  predStyles2 = predStyles2 %>% group_by(numberBlanks)
+  
+  tile = ggplot(predStyles2 %>% group_by(decontaminationTool, blankType, numberBlanks), 
+                aes(x=file, y=sampleID, fill=prediction)) +
+    geom_tile() +
+    facet_wrap(vars(numberBlanks),nrow = 1, scales="free_x") +
+    ggtitle(paste(unique(preds[[1]]$prediction), collapse=" vs "))
+  tile
+  
+  imgFileTile = file.path(resultsDir, "sample-prediction-collorgrid.png")
+  message("Saving image to: ", imgFileTile)
+  ggsave(imgFileTile, tile, device = png, units="in", width=10, height = 10)
+  
+}else{
+  message("Ignoring the heatmap section.")
+}
 
 #### alluvial ####
 
