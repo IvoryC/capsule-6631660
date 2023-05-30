@@ -31,7 +31,7 @@ dir.create(resultsDir, recursive = TRUE)
 
 #### read and record accuracy ####
 
-acc = data.frame(numBlanks=c(), accuracy=c(), numCorrect=c())
+acc = data.frame()
 preds = list()
 predAll = read.delim2(infiles[1], comment.char = "#")[c("sampleID", "actual")]
 allMethods = c()
@@ -48,10 +48,11 @@ for (i in 1:length(infiles)){
   allMethods = rbind(allMethods, methods)
   nBlanks = methods["numberBlanks"] %>% as.numeric()
   df = read.delim2(infile, comment.char = "#")
-  # df$numBlanks = nBlanks
-  acc = rbind(acc, data.frame(numBlanks=nBlanks, 
-                              accuracy=sum(df$isCorrect)/nrow(df), 
-                              numCorrect=sum(df$isCorrect)))
+  newRow = c(accuracy=sum(df$isCorrect)/nrow(df), 
+             numCorrect=sum(df$isCorrect),
+             methods)
+  acc = rbind(acc, newRow)
+  names(acc) = names(newRow)
   preds[[infile]] = df
   df = df[,c("sampleID",  "prediction")]
   names(df)[2] = shortFileId[i]
@@ -62,30 +63,36 @@ for (i in 1:length(infiles)){
 }
 names(preds) = infiles
 
-acc = acc %>% mutate_at(names(acc), as.numeric)
+acc = acc %>% mutate_at(c("accuracy", "numCorrect", "numberBlanks"), as.numeric)
 
 allMethods=data.frame(allMethods)
 row.names(allMethods) = shortFileId
 allMethods$numberBlanks = as.numeric(allMethods$numberBlanks)
 
-#### scatter plot ####
+#### scatter plot  and boxplot ####
+s0 = ggplot(acc) +
+  geom_hline(yintercept=c(0,1), color="white", linewidth=2) +
+  #geom_point(aes(x=numberBlanks, y=accuracy, color=decontaminationTool, shape=decontaminationTool)) +
+  scale_y_continuous(limits=c(0,1), breaks=seq(0,1,.2), minor_breaks=seq(0,1,.1)) +
+  scale_x_continuous(labels=unique(acc$numberBlanks), breaks = unique(acc$numberBlanks)) +
+  xlab("number of blanks for decontamination") +
+  ylab("accuracy") +
+  ggtitle(paste(unique(preds[[1]]$prediction), collapse=" vs ")) +
+  theme(axis.title = element_text(size = 20)) +
+  theme(plot.title = element_text(size = 25)) +
+  theme(axis.text = element_text(size = 15))
 
-s1 = ggplot(acc) +
-    geom_hline(yintercept=c(0,1), color="white", linewidth=2) +
-    geom_point(aes(x=numBlanks, y=accuracy)) +
-    scale_y_continuous(limits=c(0,1), breaks=seq(0,1,.2), minor_breaks=seq(0,1,.1)) +
-    scale_x_continuous(labels=unique(acc$numBlanks), breaks = unique(acc$numBlanks)) +
-    xlab("number of blanks for decontamination") +
-    ylab("accuracy") +
-    ggtitle(paste(unique(preds[[1]]$prediction), collapse=" vs ")) +
-    theme(axis.title = element_text(size = 20)) +
-    theme(plot.title = element_text(size = 25)) +
-    theme(axis.text = element_text(size = 15))
-s1
+s1 = s0 + geom_point(aes(x=numberBlanks, y=accuracy, color=decontaminationTool, shape=decontaminationTool))
 
 imgFile1 = file.path(resultsDir, "accuracy-scatterplot.png")
 message("Saving image to: ", imgFile1)
 ggsave(imgFile1, s1, device = png, units="in", width=6, height = 5)
+
+s2 = s0 + geom_boxplot(aes(x=numberBlanks, y=accuracy, group=numberBlanks, color=numberBlanks))
+
+imgFile2 = file.path(resultsDir, "accuracy-boxplot.png")
+message("Saving image to: ", imgFile2)
+ggsave(imgFile2, s2, device = png, units="in", width=6, height = 5)
 
 
 #### heatmap ####
@@ -118,7 +125,7 @@ if(FALSE){
   predNone = read.delim2(rawFile, comment.char = "#")
   predNone = predNone[,c("sampleID",  "prediction")]
   names(predNone)[2] = "predictionRaw"
-  predNone$numBlanks = 0
+  predNone$numberBlanks = 0
   
   predAll = preds[[3]][,c("sampleID",  "actual", "prediction")]
   names(predAll)[3] = "prediction90"
