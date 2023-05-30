@@ -17,7 +17,7 @@ string = "Plesae cite github('nchlis/pca.utils') see: https://rdrr.io/github/nch
 message(string); print(string)
 project_pca <- function (Xnew = NULL, pc = NULL) 
 {
-    return(scale(Xnew, pc$center, pc$scale) %*% pc$rotation)
+  return(scale(Xnew, pc$center, pc$scale) %*% pc$rotation)
 }
 
 
@@ -34,43 +34,36 @@ inputPattern = "_vsnm.csv"
 infiles = dir(decontaminationFolder, pattern=inputPattern, full.names = T, recursive = T)
 
 for (infile in infiles){
+  
+  message("Reading data from file: ", infile)
+  data = read.csv(infile, row.names = 1, comment.char = "#")
+  
+  # save output with matching sub-directory structure
+  predictionFolderBase = "../results/data/ivory/prediction"
+  indir = dirname(infile)
+  predictionFolder = sub(decontaminationFolder, predictionFolderBase, indir)
+  suppressWarnings(dir.create(predictionFolder, recursive = T))
+  
+  # Save all images for this input file to one pdf
+  plotFile = file.path(predictionFolder, sub(inputPattern, "_leave-1-out-plots.pdf", basename(infile)))
+  pdf(plotFile)
+  
+  fileSummary = data.frame()
+  
+  #### select test data ####
+  
+  categories = c("Control", "SKCM")
+  hasCat = metadataPSMatchedDPQCFiltered$disease_type_consol %in% categories
+  nameHasCat = row.names(metadataPSMatchedDPQCFiltered)[which(hasCat)]
+  data = data[nameHasCat,]
+  
+  for (test1 in nameHasCat){
     
-    message("Reading data from file: ", infile)
-    data = read.csv(infile, row.names = 1, comment.char = "#")
-    
-    # save output with matching sub-directory structure
-    predictionFolderBase = "../results/data/ivory/prediction"
-    indir = dirname(infile)
-    predictionFolder = sub(decontaminationFolder, predictionFolderBase, indir)
-    suppressWarnings(dir.create(predictionFolder, recursive = T))
-
-    # Save all images for this input file to one pdf
-    plotFile = file.path(predictionFolder, sub(inputPattern, "_leave-1-out-plots.pdf", basename(infile)))
-    pdf(plotFile)
-    
-    fileSummary = data.frame()
-    
-    #### select test data ####
-    
-    categories = c("Control", "SKCM")
-    hasCat = metadataPSMatchedDPQCFiltered$disease_type_consol %in% categories
-    nameHasCat = row.names(metadataPSMatchedDPQCFiltered)[which(hasCat)]
-    
-    for (test1 in nameHasCat){
-    
-    
-    
-    # pick one ---later do this as a loop through all samples.
-    #test1 = sample(row.names(data), size=1)
     message("Leave out sample ", test1, " as the test.")
     
     train = filter(data, rownames(data) != test1)
     
-
     #### train ####
-    
-    # interest point... is it better to train on only the categories of interest? or on all data?
-    # datasub = data[nameHasCat, ]
     
     ##### prcomp #####
     
@@ -98,38 +91,38 @@ for (infile in infiles){
     if (length(axisSet) > 12) axisSet = axisSet[1:12]
     
     d4 = pcDF %>% 
-        filter(disease_type_consol %in% categories) %>% 
-        select(axisSet, disease_type_consol) %>% 
-        gather("value", key="PC", -disease_type_consol) %>%
-        mutate(axisNum = as.numeric(gsub("PC", "", PC))) %>%
-        arrange(axisNum) 
+      filter(disease_type_consol %in% categories) %>% 
+      select(axisSet, disease_type_consol) %>% 
+      gather("value", key="PC", -disease_type_consol) %>%
+      mutate(axisNum = as.numeric(gsub("PC", "", PC))) %>%
+      arrange(axisNum) 
     
     # reset the factor levels so that the plots appear in order
     d5 = d4 %>%
-        arrange(axisNum) %>%
-        mutate(PC = factor(PC, levels=unique(PC))) %>%
-        select(-axisNum)
+      arrange(axisNum) %>%
+      mutate(PC = factor(PC, levels=unique(PC))) %>%
+      select(-axisNum)
     
     plot4 = ggplot2::ggplot(data=d5) +
-        geom_boxplot(mapping = aes(y=value, x=disease_type_consol, color = disease_type_consol)) +
-        ggtitle("prcomp values split by sample type", subtitle = paste0("made without sample: ", test1)) +
-        facet_wrap(~PC, nrow=3)
+      geom_boxplot(mapping = aes(y=value, x=disease_type_consol, color = disease_type_consol)) +
+      ggtitle("prcomp values split by sample type", subtitle = paste0("made without sample: ", test1)) +
+      facet_wrap(~PC, nrow=3)
     #plot4
     
     ##### prcomp choose best #####
     # Choose the single best axis for separating the data.
     axisPs = sapply(axisSet, function(ax) {
-        t.test(data=d4 %>% filter(PC == ax), 
-               value ~ disease_type_consol)$p.value
+      t.test(data=d4 %>% filter(PC == ax), 
+             value ~ disease_type_consol)$p.value
     })
     bestAxis = names(axisPs)[which(axisPs == min(axisPs))]
     message("Axis ", bestAxis, " is the best at separating ", paste(categories, collapse=" from "))
     
     # highlight the best axis in the plot
     plot6 = plot4 +
-        geom_rect(data = subset(d5, PC == bestAxis), 
-                  fill = NA, colour = "red", 
-                  xmin = -Inf,xmax = Inf, ymin = -Inf,ymax = Inf)
+      geom_rect(data = subset(d5, PC == bestAxis), 
+                fill = NA, colour = "red", 
+                xmin = -Inf,xmax = Inf, ymin = -Inf,ymax = Inf)
     
     # save plot
     #plotFile = sub(inputPattern, "_prcomp-boxplot.png", infile)
@@ -166,11 +159,11 @@ for (infile in infiles){
     
     
     claims = sapply(categories, function(cat){
-        catVals = pcDF %>% 
-            filter(disease_type_consol == cat) %>%
-            select(bestAxis) %>% 
-            unlist()
-        t.test(catVals, pro.test.val, var.equal = T)$p.value
+      catVals = pcDF %>% 
+        filter(disease_type_consol == cat) %>%
+        select(bestAxis) %>% 
+        unlist()
+      t.test(catVals, pro.test.val, var.equal = T)$p.value
     })
     claims = claims[order(claims, decreasing = T)]
     
@@ -189,25 +182,25 @@ for (infile in infiles){
     fileSummary = rbind(fileSummary, 
                         c(sampleID=test1, actual=realCategory, prediction=predict, confidenceP=confidenceP))
     
-    } #done test with sample
-    
-    names(fileSummary) = c("sampleID", "actual", "prediction", "confidenceP")
-    fileSummary$isCorrect = fileSummary$actual == fileSummary$prediction
-    summr = paste("Predictions were correct for", sum(fileSummary$isCorrect), "of", nrow(fileSummary), "leave-1-out samples.")
-    message(summr)
-    
-    tableFile = file.path(predictionFolder, sub(inputPattern, "_leave-1-out-prediction-summary.txt", basename(infile)))
-    message("Saving file: ", tableFile)
-    commentLines = readLines(infile, n=30) %>% grep(pattern="#METHODS", value = TRUE)
-    additionalComment = paste("#", summr)
-    writeLines(tableFile, text = c(additionalComment, commentLines))
-    write.table(fileSummary, file=tableFile, quote=F, row.names = F, sep="\t", append=T)
-    rm(fileSummary, commentLines, additionalComment)
-    
-    dev.off()
-    
-    message("Done with file ", infile, ".")
-    
+  } #done test with sample
+  
+  names(fileSummary) = c("sampleID", "actual", "prediction", "confidenceP")
+  fileSummary$isCorrect = fileSummary$actual == fileSummary$prediction
+  summr = paste("Predictions were correct for", sum(fileSummary$isCorrect), "of", nrow(fileSummary), "leave-1-out samples.")
+  message(summr)
+  
+  tableFile = file.path(predictionFolder, sub(inputPattern, "_leave-1-out-prediction-summary.txt", basename(infile)))
+  message("Saving file: ", tableFile)
+  commentLines = readLines(infile, n=30) %>% grep(pattern="#METHODS", value = TRUE)
+  additionalComment = paste("#", summr)
+  writeLines(tableFile, text = c(additionalComment, commentLines))
+  write.table(fileSummary, file=tableFile, quote=F, row.names = F, sep="\t", append=T)
+  rm(fileSummary, commentLines, additionalComment)
+  
+  dev.off()
+  
+  message("Done with file ", infile, ".")
+  
 }
 
 message("Done!")
