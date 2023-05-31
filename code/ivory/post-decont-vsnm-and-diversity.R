@@ -50,10 +50,10 @@ message(paste(sampleSet, collapse = ", "))
 
 # SCRuB files in ../results/data/decontaminate/SCRuB/trial_*/scrub_output.csv
 # infiles = c(
-#     dir("../results/data/ivory/decontamination/SCRuB", pattern="decontaminated.csv", full.names = T, recursive = T),
-#     dir("../results/data/ivory/decontamination/SCRuB_noPlate", pattern="output.csv", full.names = T, recursive = T))
+#     dir("../results/decontamination/SCRuB", pattern="decontaminated.csv", full.names = T, recursive = T),
+#     dir("../results/decontamination/SCRuB_noPlate", pattern="output.csv", full.names = T, recursive = T))
 
-decontaminationFolder = "../results/data/ivory/decontamination"
+decontaminationFolder = "../results/decontamination"
 infiles = dir(decontaminationFolder, pattern="decontaminated.csv", full.names = T, recursive = T)
 
 #### methods ####
@@ -159,25 +159,25 @@ for (infile in infiles){
 #### diversity summary ####
 
 suppressWarnings({
-    dir.create("../results/data/ivory/shannon_diversity", recursive = TRUE) 
+    dir.create("../results/shannon_diversity", recursive = TRUE) 
 })
 
 shortNames = sub(decontaminationFolder, "", names(diversitySummary))
 shortNames = sub("trial_", "t", shortNames)
 names(diversitySummary) = shortNames
 
-summaryFile = "../results/data/ivory/shannon_diversity/shannon_summary.csv"
+summaryFile = "../results/shannon_diversity/shannon_summary.csv"
 message("Saving diversity summary info to: ", summaryFile)
 write.csv(diversitySummary, summaryFile)
 
-heatFile = "../results/data/ivory/shannon_diversity/shannon_heatmap.png"
+heatFile = "../results/shannon_diversity/shannon_heatmap.png"
 message("Saving diversity heatmap: ", heatFile)
 png(heatFile)
 heatmap(as.matrix(diversitySummary))
 dev.off()
 
 
-boxFile = "../results/data/ivory/shannon_diversity/shannon_heatmap.png"
+boxFile = "../results/shannon_diversity/shannon_heatmap.png"
 message("Saving diversity boxplot: ", boxFile)
 png(boxFile)
 boxplot(diversitySummary, las=2, col="skyblue")
@@ -188,9 +188,9 @@ dev.off()
 
 
 # example
-# Processing file: ../results/data/ivory/decontamination/SCRuB_noPlate/trial_2/scrub_decontaminated.csv
-# Saving file: ../results/data/ivory/decontamination/SCRuB_noPlate/trial_2/scrub_decontaminated_diversity.csv
-# Saving file: ../results/data/ivory/decontamination/SCRuB_noPlate/trial_2/scrub_decontaminated_vsnm.csv
+# Processing file: ../results/decontamination/SCRuB_noPlate/trial_2/scrub_decontaminated.csv
+# Saving file: ../results/decontamination/SCRuB_noPlate/trial_2/scrub_decontaminated_diversity.csv
+# Saving file: ../results/decontamination/SCRuB_noPlate/trial_2/scrub_decontaminated_vsnm.csv
 
 
 # scrubbed_normalized <- vsnm(scrub_df[row.names(metadataPSMatchedDPQCFiltered), ])

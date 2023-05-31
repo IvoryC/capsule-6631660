@@ -9,7 +9,7 @@ sessionInfo()
 
 #### a place to save data ####
 suppressWarnings({
-    dir.create("../results/data/ivory/before-decontamination", recursive = TRUE) 
+    dir.create("../results/before-decontamination", recursive = TRUE) 
 })
 
 #### as is files ####
@@ -39,7 +39,7 @@ row.names(full_df) <- taxa_names
 full_df <- full_df %>% t()
 
 write.csv(full_df,
-          "../results/data/ivory/before-decontamination/full_df.csv")
+          "../results/before-decontamination/full_df.csv")
 
 #### metadata ####
 
@@ -59,7 +59,7 @@ unique_metadata <- metadata %>%
 unique_samps <- full_df[as.character(unique_metadata$X.SampleID), ]
 
 write.csv(unique_samps,
-          "../results/data/ivory/before-decontamination/unique_samps.csv")
+          "../results/before-decontamination/unique_samps.csv")
 
 #### not-used--final_df ####
 final_df <- full_df[which(row.names(full_df) %>% str_detect('Control') == F ), ] %>%
@@ -75,7 +75,7 @@ removed_copies <- metadata %>% filter( ( str_detect(X.SampleID, 'Control') == F 
                                X.SampleID %>% str_detect('12691') ) )
 
 write.csv(removed_copies,
-          "../results/data/ivory/before-decontamination/removed_copies.csv")
+          "../results/before-decontamination/removed_copies.csv")
 
 #### unique_metadata ####
 
@@ -83,7 +83,7 @@ unique_metadata <- as.data.frame(unique_metadata)
 row.names(unique_metadata) <- unique_metadata[, 'X.SampleID'] %>% as.character()
 
 write.csv(unique_metadata,
-          "../results/data/ivory/before-decontamination/unique_metadata.csv")
+          "../results/before-decontamination/unique_metadata.csv")
 
 #### well_dists ####
 
@@ -96,7 +96,7 @@ write.csv(unique_metadata,
 # well_dists = round(well_dists, digits = 2)
 # 
 # write.csv(well_dists,
-#           "../results/data/ivory/before-decontamination/well_dists.csv")
+#           "../results/before-decontamination/well_dists.csv")
 
 message("Done!")
 date()

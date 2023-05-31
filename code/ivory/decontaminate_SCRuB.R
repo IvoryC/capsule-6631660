@@ -18,14 +18,14 @@ library(SCRuB)
 
 sessionInfo()
 
-scriptResultsDir = "../results/data/ivory/decontamination/SCRuB-byPlate"
+scriptResultsDir = "../results/decontamination/SCRuB-byPlate"
 suppressWarnings({
     dir.create(scriptResultsDir, recursive = TRUE)
 })
 
 #### read data ####
 
-full_df = read.csv("../results/data/ivory/before-decontamination/full_df.csv", row.names = 1)
+full_df = read.csv("../results/before-decontamination/full_df.csv", row.names = 1)
 message("full_df.csv has dimentions:")
 dim(full_df)
 

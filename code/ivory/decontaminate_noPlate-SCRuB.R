@@ -48,7 +48,7 @@ message("In each trial, will subsample to remove proportion of blanks: ", dropBl
 
 #### read data ####
 
-full_df = read.csv("../results/data/ivory/before-decontamination/full_df.csv", row.names = 1)
+full_df = read.csv("../results/before-decontamination/full_df.csv", row.names = 1)
 print("full_df.csv has dimentions:")
 dim(full_df)
 
@@ -71,7 +71,7 @@ metadata = metadata[sample_intersect, ]
 
 
 
-scriptResultsDir = "../results/data/ivory/decontamination/SCRuB-noPlate"
+scriptResultsDir = "../results/decontamination/SCRuB-noPlate"
 suppressWarnings({
   dir.create(scriptResultsDir, recursive = TRUE)
 })

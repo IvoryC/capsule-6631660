@@ -5,14 +5,14 @@ library(tidyverse)
 
 sessionInfo()
 
-resDir = "../results/data/ivory/decontamination/raw/trial_0"
+resDir = "../results/decontamination/raw/trial_0"
 suppressWarnings({
     dir.create(resDir, recursive = TRUE)
 })
 
 #### read data ####
 
-full_df = read.csv("../results/data/ivory/before-decontamination/full_df.csv", row.names = 1)
+full_df = read.csv("../results/before-decontamination/full_df.csv", row.names = 1)
 message("full_df.csv has dimentions:")
 dim(full_df)
 

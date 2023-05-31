@@ -50,7 +50,7 @@ metadataPSMatchedDPQCFiltered <- read.csv('../data/Fig4_plasma/Metadata-Plasma-F
 
 #### find input data files ####
 
-decontaminationFolder = "../results/data/ivory/decontamination"
+decontaminationFolder = "../results/decontamination"
 inputPattern = "_vsnm.csv"
 infiles = dir(decontaminationFolder, pattern=inputPattern, full.names = T, recursive = T)
 message("Found ", length(infiles), " input files.")
@@ -61,7 +61,7 @@ for (infile in infiles){
   data = read.csv(infile, row.names = 1, comment.char = "#")
   
   # save output with matching sub-directory structure
-  predictionFolderBase = "../results/data/ivory/prediction"
+  predictionFolderBase = "../results/prediction"
   indir = dirname(infile)
   predictionFolderBase = sub(decontaminationFolder, predictionFolderBase, indir)
   predictionFolder = file.path(predictionFolderBase, paste(categories, collapse = "_vs_"))

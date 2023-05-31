@@ -13,12 +13,12 @@ library(tidyr)
 
 #### find data ####
 
-predictionFolder = "../results/data/ivory/prediction"
+predictionFolder = "../results/prediction"
 inputPattern = "prediction-summary.txt"
 infiles = dir(predictionFolder, pattern=inputPattern, full.names = T, recursive = T)
 message("Found ", length(infiles), " prediction files.")
 
-resultsDir = "../results/data/ivory/accuracySummary"
+resultsDir = "../results/accuracySummary"
 dir.create(resultsDir, recursive = TRUE)
 
 #### read and record accuracy ####
@@ -119,7 +119,7 @@ if (FALSE){
 #### alluvial ####
 
 if(FALSE){
-  rawFile = "../results/data/ivory/prediction/raw/trial_0/not_decontaminated_leave-1-out-prediction-summary.txt"
+  rawFile = "../results/prediction/raw/trial_0/not_decontaminated_leave-1-out-prediction-summary.txt"
   predNone = read.delim2(rawFile, comment.char = "#")
   predNone = predNone[,c("sampleID",  "prediction")]
   names(predNone)[2] = "predictionRaw"
