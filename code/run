@@ -80,7 +80,7 @@ Rscript ivory/alt-ML.R categories=SKCM,NSCLC
 echo -e "\n=========================================================\n"
 echo "Date/Time: $(date)"
 echo -e "[1 of 1] summarize_performance.R ... \n"
-Rscript summarize_performance.R
+Rscript ivory/summarize_performance.R
 
 
 
