@@ -11,23 +11,15 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 
-
-
 #### find data ####
-
 
 predictionFolder = "../results/data/ivory/prediction"
 inputPattern = "prediction-summary.txt"
 infiles = dir(predictionFolder, pattern=inputPattern, full.names = T, recursive = T)
-message("Found ", length(infiles), " files of predictions.")
-
-
-infiles = infiles[grep("trial_", infiles)]
-message("Found ", length(infiles), " files of predictions that are 'trial_1'.")
+message("Found ", length(infiles), " prediction files.")
 
 resultsDir = "../results/data/ivory/accuracySummary"
 dir.create(resultsDir, recursive = TRUE)
-
 
 #### read and record accuracy ####
 
@@ -51,8 +43,13 @@ for (i in 1:length(infiles)){
   newRow = c(accuracy=sum(df$isCorrect)/nrow(df), 
              numCorrect=sum(df$isCorrect),
              methods)
-  acc = rbind(acc, newRow)
-  names(acc) = names(newRow)
+  keys = union(names(newRow), names(acc))
+  if (nrow(acc)==0) acc = data.frame(t(newRow))
+  else {
+    newcols = setdiff(keys, names(acc))
+    for (nc in newcols) acc[nc] = NA
+    acc = rbind(acc[,keys], newRow[keys])
+  }
   preds[[infile]] = df
   df = df[,c("sampleID",  "prediction")]
   names(df)[2] = shortFileId[i]
@@ -77,10 +74,11 @@ s0 = ggplot(acc) +
   scale_x_continuous(labels=unique(acc$numberBlanks), breaks = unique(acc$numberBlanks)) +
   xlab("number of blanks for decontamination") +
   ylab("accuracy") +
-  ggtitle(paste(unique(preds[[1]]$prediction), collapse=" vs ")) +
+  ggtitle("Accuracy by classifaction task") +
   theme(axis.title = element_text(size = 20)) +
   theme(plot.title = element_text(size = 25)) +
-  theme(axis.text = element_text(size = 15))
+  theme(axis.text = element_text(size = 15))+
+  facet_wrap("predictionCategories", nrow=2)
 
 s1 = s0 + geom_point(aes(x=numberBlanks, y=accuracy, color=decontaminationTool, shape=decontaminationTool))
 

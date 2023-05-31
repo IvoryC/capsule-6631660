@@ -23,6 +23,27 @@ project_pca <- function (Xnew = NULL, pc = NULL)
 
 sessionInfo()
 
+#### categories of interest ####
+
+# default
+categories = c("Control", "SKCM") 
+
+# command line
+args = commandArgs(trailingOnly=TRUE)
+if (length(args) > 0) {
+  args2 = args %>% strsplit(split="=")
+  key = sapply(args2, function(x) x[[1]])
+  argVals = sapply(args2, function(x) x[[2]])
+  names(argVals) = key
+  if ("categories" %in% key) {
+    categories = strsplit(argVals["categories"], split=",")[[1]]
+    message("Using command line arg value for 'categories':", args)
+  }else{
+    message("Using default value for 'categories'.")
+  }
+}
+message("In this run, we will aim to distinguish between 'categories': ", paste(categories, collapse = " vs "))
+
 #### read meta data ####
 
 metadataPSMatchedDPQCFiltered <- read.csv('../data/Fig4_plasma/Metadata-Plasma-Filtered-For-Analysis.csv', row.names=1)
@@ -42,8 +63,10 @@ for (infile in infiles){
   # save output with matching sub-directory structure
   predictionFolderBase = "../results/data/ivory/prediction"
   indir = dirname(infile)
-  predictionFolder = sub(decontaminationFolder, predictionFolderBase, indir)
+  predictionFolderBase = sub(decontaminationFolder, predictionFolderBase, indir)
+  predictionFolder = file.path(predictionFolderBase, paste(categories, collapse = "_vs_"))
   suppressWarnings(dir.create(predictionFolder, recursive = T))
+  message("Using output dir: ", predictionFolder)
   
   # Save all images for this input file to one pdf
   plotFile = file.path(predictionFolder, sub(inputPattern, "_leave-1-out-plots.pdf", basename(infile)))
@@ -53,7 +76,6 @@ for (infile in infiles){
   
   #### select test data ####
   
-  categories = c("Control", "SKCM")
   hasCat = metadataPSMatchedDPQCFiltered$disease_type_consol %in% categories
   nameHasCat = row.names(metadataPSMatchedDPQCFiltered)[which(hasCat)]
   data = data[nameHasCat,]
@@ -193,9 +215,16 @@ for (infile in infiles){
   
   tableFile = file.path(predictionFolder, sub(inputPattern, "_leave-1-out-prediction-summary.txt", basename(infile)))
   message("Saving file: ", tableFile)
-  commentLines = readLines(infile, n=30) %>% grep(pattern="#METHODS", value = TRUE)
-  additionalComment = paste("#", summr)
-  writeLines(tableFile, text = c(additionalComment, commentLines))
+  
+  # append METHODS comments about this process to the comments that were in the infile
+  METHODS_KEY="#METHODS "
+  commentLinesIN = readLines(infile, n=30) %>% grep(pattern=METHODS_KEY, value = TRUE)
+  commentLinesOUT = c(commentLinesIN, 
+                      paste0(METHODS_KEY, "predictionCategories=", paste0(categories, collapse=",")))
+  generalComment = paste("#", summr)
+  writeLines(tableFile, text = c(generalComment, commentLinesOUT))
+  
+  # write the main table to the same file
   write.table(fileSummary, file=tableFile, quote=F, row.names = F, sep="\t", append=T)
   rm(fileSummary, commentLines, additionalComment)
   
